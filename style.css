@@ -1,0 +1,24 @@
+body {
+    margin: 0;
+}
+  
+html {
+    box-sizing: border-box;
+}
+  
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+  
+a {
+    color: #000;
+}
+  
+.footer {
+    margin: 1em 0 0 0;
+    background-color: #f0f0f0;
+    padding: 1.2em;
+    display: flex;
+    justify-content: space-between;
+    font-family: sans-serif;
+}
