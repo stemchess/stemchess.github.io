@@ -22,3 +22,19 @@ a {
     justify-content: space-between;
     font-family: sans-serif;
 }
+
+.footer-item {
+    flex: 1;
+}
+
+.left {
+    text-align: left;
+}
+
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
