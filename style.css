@@ -20,9 +20,31 @@ a {
     padding: 0.2em;
 }
 
+#board {
+    box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.15);
+    width: 80vmin;
+    height: 80vmin;
+    margin: 8vmin auto;
+    line-height: 0px;
+}
+
+.tile {
+    width: 10vmin;
+    height: 10vmin;
+    display: inline-block;
+}
+
+.light {
+    background-color: #ca7;
+}
+
+.dark {
+    background-color: #964;
+}
+
 #footer {
     margin: 1em 0 0 0;
-    background-color: #f0f0f0;
+    background-color: #eee;
     padding: 1.2em;
     display: flex;
     justify-content: space-between;
