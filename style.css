@@ -24,8 +24,9 @@ a {
     box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.15);
     width: 80vmin;
     height: 80vmin;
-    margin: 8vmin auto;
+    margin: 4em auto;
     line-height: 0px;
+    position: relative;
 }
 
 .tile {
@@ -36,10 +37,42 @@ a {
 
 .light {
     background-color: #ca7;
+    color: #ca7;
 }
 
 .dark {
     background-color: #964;
+    color: #964;
+}
+
+#labels {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-family: sans-serif;
+    font-size: 2.5vmin;
+}
+
+#ranks {
+    width: 10vmin;
+    top: 1.8vmin;
+    left: 0.6vmin;
+    position: absolute;
+}
+
+#files {
+    position: absolute;
+    top: 78.2vmin;
+    left: 7.6vmin;
+    width: 80vmin;
+}
+
+.label {
+    display: inline-block;
+    width: 10vmin;
+    height: 10vmin;
+    background-color: unset !important;
 }
 
 #footer {
