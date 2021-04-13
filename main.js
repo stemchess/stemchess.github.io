@@ -35,6 +35,23 @@ class chessPiece {
     }
 }
 
+/*
+This is a super inefficient way to do this (it loops through every single space on the baord).
+It works.
+
+(And most moves shouldn't use it)
+*/
+function synchronizeBoardState() {
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            if (board[i][j]) {
+                console.log(board[i][j]);
+                //TODO
+            } 
+        }
+    }
+}
+
 // This function resets the board.
 function resetBoard() {
     // Set the board to be empty (really only neccesary if there's anything already in it; i.e., not the first time)
@@ -44,13 +61,42 @@ function resetBoard() {
         board[i] = new Array(8);
     }
 
-    // Set up the initial position of the board (TODO)
+    // Set all of the initial pieces on the board
+    board[0][0] = new chessPiece('a', 1, 'r', 'w');
+    board[0][1] = new chessPiece('b', 1, 'n', 'w');
+    board[0][2] = new chessPiece('c', 1, 'b', 'w');
+    board[0][3] = new chessPiece('d', 1, 'q', 'w');
+    board[0][4] = new chessPiece('e', 1, 'k', 'w');
+    board[0][5] = new chessPiece('f', 1, 'b', 'w');
+    board[0][6] = new chessPiece('g', 1, 'n', 'w');
+    board[0][7] = new chessPiece('h', 1, 'r', 'w');
+
+    // This allows us to quickly look up which file we are in from a number
+    let fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+    // These are full rows of (nearly) identical pawns, so it's fairly simple to just loop through them.
+    for (let i = 0; i < 8; i++) {
+        board[1][i] = new chessPiece(fileLetters[i], 2, 'p', 'w')
+    }
+
+    for (let i = 0; i < 8; i++) {
+        board[6][i] = new chessPiece(fileLetters[i], 7, 'p', 'b')
+    }
+    
+    board[7][0] = new chessPiece('a', 8, 'r', 'b');
+    board[7][1] = new chessPiece('b', 8, 'n', 'b');
+    board[7][2] = new chessPiece('c', 8, 'b', 'b');
+    board[7][3] = new chessPiece('d', 8, 'q', 'b');
+    board[7][4] = new chessPiece('e', 8, 'k', 'b');
+    board[7][5] = new chessPiece('f', 8, 'b', 'b');
+    board[7][6] = new chessPiece('g', 8, 'n', 'b');
+    board[7][7] = new chessPiece('h', 8, 'r', 'b');
+
+    // Make the pieces actually show up
+    // This is probably somewhat inefficient (as noted above), but it's simple.
+    synchronizeBoardState();
 }
 
 // Actually use the function above to reset the board
 resetBoard();
 
-// This is probably a super inefficient way to do this
-function synchronizeBoardState() {
-    // TODO
-}
