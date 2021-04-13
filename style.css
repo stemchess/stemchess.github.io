@@ -15,9 +15,13 @@ a {
 }
 
 #header {
-    font-size: 3em;
+    font-size: 6em;
     font-family: sans-serif;
     padding: 0.2em;
+    background-image: url(/images/header.jpg);
+    height: 25vmin;
+    background-position: center;
+    background-size: cover;
 }
 
 #board {
@@ -78,7 +82,7 @@ a {
 #footer {
     margin: 1em 0 0 0;
     background-color: #eee;
-    padding: 1.2em;
+    padding: 1.3em;
     display: flex;
     justify-content: space-between;
     font-family: sans-serif;
