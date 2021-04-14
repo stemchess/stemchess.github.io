@@ -60,15 +60,16 @@ a {
 
 #ranks {
     width: 10vmin;
-    top: 1.8vmin;
-    left: 0.6vmin;
+    top: 1.6vmin;
+    left: 0.4vmin;
     position: absolute;
 }
 
 #files {
+    text-align: right;
     position: absolute;
-    top: 78.2vmin;
-    left: 7.6vmin;
+    top: 78.6vmin;
+    left: -0.4vmin;
     width: 80vmin;
 }
 
