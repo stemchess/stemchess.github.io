@@ -49,6 +49,14 @@ a {
     color: #964;
 }
 
+.light.selected {
+    background-color: #9ac;
+}
+
+.dark.selected {
+    background-color: #88a;
+}
+
 #labels {
     pointer-events: none;
     position: absolute;
