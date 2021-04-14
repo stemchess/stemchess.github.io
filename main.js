@@ -36,17 +36,31 @@ class chessPiece {
 }
 
 /*
-This is a super inefficient way to do this (it loops through every single space on the baord).
+This is a super inefficient way to do this (it loops through every single space on the board).
 It works.
 
 (And most moves shouldn't use it)
 */
 function synchronizeBoardState() {
+    // Set the background of all tiles to be blank
+    let allTiles = document.getElementsByClassName('tile');
+    for (let i = 0; i < allTiles.length; i++) {
+        allTiles[i].style.backgroundImage = ''
+    }
+
+    // Loop through every space in the JS board and set background images accordingly
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             if (board[i][j]) {
-                console.log(board[i][j]);
-                //TODO
+                let currentPiece = board[i][j];
+                
+                let currentPosition = currentPiece.position;
+                let currentNotation = currentPosition['x'] + String(currentPosition['y']);
+                let currentTile = document.getElementById(currentNotation);
+
+                let imageLocation = 'url("/images/' + currentPiece.type + currentPiece.color + '.svg")'
+
+                currentTile.style.backgroundImage = imageLocation;
             } 
         }
     }
