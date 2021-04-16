@@ -19,9 +19,7 @@ so I just used it everywhere so I don't have to convert it back and forth.
 */
 
 
-/*
-GLOBAL VARIABLE DECLARATION
-*/
+/* GLOBAL VARIABLE DECLARATION */
 
 // Create a representation of the board
 let board = new Array();
@@ -31,9 +29,7 @@ let previousMove = new Array(2);
 let currentMove = new Array(2);
 
 
-/*
-BOARD SETUP
-*/
+/* BOARD SETUP */
 
 /*
 This class takes variuos characteristics and turns them into an "object".
@@ -128,9 +124,7 @@ function resetBoard() {
 resetBoard();
 
 
-/*
-MOVING PIECES
-*/
+/* MOVING PIECES */
 
 function movePiece() {
 
