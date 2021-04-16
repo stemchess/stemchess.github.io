@@ -19,12 +19,21 @@ so I just used it everywhere so I don't have to convert it back and forth.
 */
 
 
+/*
+GLOBAL VARIABLE DECLARATION
+*/
+
 // Create a representation of the board
 let board = new Array();
 
 // Note which spaces are currently selected, and which ones were selected in the previous move
 let previousMove = new Array(2);
 let currentMove = new Array(2);
+
+
+/*
+BOARD SETUP
+*/
 
 /*
 This class takes variuos characteristics and turns them into an "object".
@@ -117,6 +126,11 @@ function resetBoard() {
 
 // Actually use the function above to reset the board
 resetBoard();
+
+
+/*
+MOVING PIECES
+*/
 
 function movePiece() {
 
