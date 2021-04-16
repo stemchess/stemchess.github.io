@@ -137,14 +137,22 @@ function movePiece() {
 }
 
 function clickSquare(e) {
-    let tileClicked = e.target.id;
+    let elementClicked = e.target;
+    let tileClicked = elementClicked.id;
 
-    if (currentMove == new Array(2)) {
+    // TODO: figure out why we can't just compare this to 'new Array(2)' or '[,,]'
+    if (currentMove[0] == undefined) {
+        // If there are no tiles selected for the current move, select this one
         currentMove[0] = tileClicked;
+        elementClicked.classList.add('selected');
     } else if (tileClicked == currentMove[0]) {
+        // If this tile is already selected for the current move, deselect it
         currentMove = new Array(2);
+        elementClicked.classList.remove('selected');
     } else {
+        // If one other tile is alredy selected for the current move, select this one and move
         currentMove[1] = tileClicked;
+        elementClicked.classList.add('selected');
         movePiece();
     }
 }
