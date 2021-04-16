@@ -168,7 +168,6 @@ function clickSquare(e) {
     let elementClicked = e.target;
     let tileClicked = elementClicked.id;
 
-    // TODO: figure out why we can't just compare this to 'new Array(2)' or '[,,]' - also above
     if (currentMove[0] == undefined) {
         // If there are no tiles selected for the current move, select this one
         currentMove[0] = tileClicked;
