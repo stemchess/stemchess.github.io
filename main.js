@@ -147,9 +147,6 @@ function clickSquare(e) {
         currentMove[1] = tileClicked;
         movePiece();
     }
-
-    // Move the piece
-    movePiece();
 }
 
 // Run a function when the board is clicked
