@@ -126,15 +126,49 @@ resetBoard();
 
 /* MOVING PIECES */
 
-function movePiece() {
+// Converts notation (as used in the tile IDs) to numbers to reference the array
+function notationToPosition(notation) {
+    // C.f. above
+    let fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
+    let x = fileLetters.indexOf(notation[0]);
+    let y = notation[1] - 1;
+
+    return {x, y};
+}
+
+function movePiece() {
+    // Stop marking the previous move
+    if (previousMove[0] != undefined) {
+        document.getElementById(previousMove[0]).classList.remove('selected');
+        document.getElementById(previousMove[1]).classList.remove('selected');
+    }
+
+    // Convert a few things into more easily usable formats
+    let startingPosition = notationToPosition(currentMove[0]);
+    let endingPosition = notationToPosition(currentMove[1]);
+
+    let startingElement = document.getElementById(currentMove[0]);
+    let endingElement = document.getElementById(currentMove[1]);
+
+    // Move the piece on our JS representation of the board (overwriting anything that's already there)
+    board[endingPosition['x']][endingPosition['y']] = board[startingPosition['x']][startingPosition['y']];
+    board[startingPosition['x']][startingPosition['y']] = undefined;
+
+    // Display the move
+    endingElement.style.backgroundImage = startingElement.style.backgroundImage;
+    startingElement.style.backgroundImage = '';
+
+    // Set this to be the previous move and set the current to be empty
+    previousMove = currentMove;
+    currentMove = new Array(2);
 }
 
 function clickSquare(e) {
     let elementClicked = e.target;
     let tileClicked = elementClicked.id;
 
-    // TODO: figure out why we can't just compare this to 'new Array(2)' or '[,,]'
+    // TODO: figure out why we can't just compare this to 'new Array(2)' or '[,,]' - also above
     if (currentMove[0] == undefined) {
         // If there are no tiles selected for the current move, select this one
         currentMove[0] = tileClicked;
