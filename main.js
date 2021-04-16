@@ -22,6 +22,10 @@ so I just used it everywhere so I don't have to convert it back and forth.
 // Create a representation of the board
 let board = new Array();
 
+// Note which spaces are currently selected, and which ones were selected in the previous move
+let previousMove = new Array(2);
+let currentMove = new Array(2);
+
 /*
 This class takes variuos characteristics and turns them into an "object".
 We can use this to create an object for each piece, but with a lot of shared characteristics to avoid repetition.
@@ -114,3 +118,25 @@ function resetBoard() {
 // Actually use the function above to reset the board
 resetBoard();
 
+function movePiece() {
+
+}
+
+function clickSquare(e) {
+    let tileClicked = e.target.id;
+
+    if (currentMove == new Array(2)) {
+        currentMove[0] = tileClicked;
+    } else if (tileClicked == currentMove[0]) {
+        currentMove = new Array(2);
+    } else {
+        currentMove[1] = tileClicked;
+        movePiece();
+    }
+
+    // Move the piece
+    movePiece();
+}
+
+// Run a function when the board is clicked
+document.getElementById('board').addEventListener('click', clickSquare);
