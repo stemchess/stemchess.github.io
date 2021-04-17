@@ -135,13 +135,21 @@ resetBoard();
 
 /* MOVING PIECES */
 
-// Converts notation (as used in the tile IDs) to numbers to reference the array
-function notationToPosition(notation) {
+// Converts notation (as used in tile IDs) to numbers to reference the array
+function notationToArrayIndex(notation) {
     // C.f. above
     const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
     let x = fileLetters.indexOf(notation[0]);
     let y = notation[1] - 1;
+
+    return {x, y};
+}
+
+// Converts notation (as used in tile IDs) to an {x, y} object as stored in the representation of individual pieces
+function notationToPositionObject(notation) {
+    let x = notation[0];
+    let y = notation[1];
 
     return {x, y};
 }
@@ -159,14 +167,15 @@ function movePiece() {
     }
 
     // Convert a few things into more easily usable formats
-    let startingPosition = notationToPosition(currentMove[0]);
-    let endingPosition = notationToPosition(currentMove[1]);
+    let startingPosition = notationToArrayIndex(currentMove[0]);
+    let endingPosition = notationToArrayIndex(currentMove[1]);
 
     let startingElement = document.getElementById(currentMove[0]);
     let endingElement = document.getElementById(currentMove[1]);
 
     // Move the piece on our JS representation of the board (overwriting anything that's already there)
     board[endingPosition['x']][endingPosition['y']] = board[startingPosition['x']][startingPosition['y']];
+    board[endingPosition['x']][endingPosition['y']].position = notationToPositionObject(currentMove[1]);
     board[startingPosition['x']][startingPosition['y']] = undefined;
 
     // Display the move
@@ -178,13 +187,14 @@ function movePiece() {
     currentMove = new Array(2);
 }
 
+// This is the function that runs when a tile is clicked
 function clickSquare(e) {
     let elementClicked = e.target;
     let tileClicked = elementClicked.id;
 
     if (currentMove[0] == undefined) {
         // If there are no tiles selected for the current move, select this one if there is a piece there
-        let position = notationToPosition(tileClicked);
+        let position = notationToArrayIndex(tileClicked);
         
         if (board[position['x']][position['y']]) {
             currentMove[0] = tileClicked;
@@ -195,7 +205,7 @@ function clickSquare(e) {
         currentMove = new Array(2);
         elementClicked.classList.remove('selected');
     } else {
-        // If one other tile is alredy selected for the current move, select this one and move
+        // If one other tile is alredy selected for the current move, select this one and move the selected piece
         currentMove[1] = tileClicked;
         elementClicked.classList.add('selected');
         movePiece();
