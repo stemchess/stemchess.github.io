@@ -140,8 +140,13 @@ function notationToPosition(notation) {
 function movePiece() {
     // Stop marking the previous move
     if (previousMove[0] != undefined) {
-        document.getElementById(previousMove[0]).classList.remove('selected');
-        document.getElementById(previousMove[1]).classList.remove('selected');
+        // Unless it's also one of the current moves
+        if (!currentMove.includes(previousMove[0])) {
+            document.getElementById(previousMove[0]).classList.remove('selected');            
+        }
+        if (!currentMove.includes(previousMove[1])) {
+            document.getElementById(previousMove[1]).classList.remove('selected');            
+        }
     }
 
     // Convert a few things into more easily usable formats
