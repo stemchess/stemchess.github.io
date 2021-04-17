@@ -86,33 +86,33 @@ function resetBoard() {
 
     // Set all of the initial pieces on the board
     board[0][0] = new chessPiece('a', 1, 'r', 'w');
-    board[0][1] = new chessPiece('b', 1, 'n', 'w');
-    board[0][2] = new chessPiece('c', 1, 'b', 'w');
-    board[0][3] = new chessPiece('d', 1, 'q', 'w');
-    board[0][4] = new chessPiece('e', 1, 'k', 'w');
-    board[0][5] = new chessPiece('f', 1, 'b', 'w');
-    board[0][6] = new chessPiece('g', 1, 'n', 'w');
-    board[0][7] = new chessPiece('h', 1, 'r', 'w');
+    board[1][0] = new chessPiece('b', 1, 'n', 'w');
+    board[2][0] = new chessPiece('c', 1, 'b', 'w');
+    board[3][0] = new chessPiece('d', 1, 'q', 'w');
+    board[4][0] = new chessPiece('e', 1, 'k', 'w');
+    board[5][0] = new chessPiece('f', 1, 'b', 'w');
+    board[6][0] = new chessPiece('g', 1, 'n', 'w');
+    board[7][0] = new chessPiece('h', 1, 'r', 'w');
 
     // This allows us to quickly look up which file we are in from a number
     let fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
     // These are full rows of (nearly) identical pawns, so it's fairly simple to just loop through them.
     for (let i = 0; i < 8; i++) {
-        board[1][i] = new chessPiece(fileLetters[i], 2, 'p', 'w')
+        board[i][1] = new chessPiece(fileLetters[i], 2, 'p', 'w')
     }
 
     for (let i = 0; i < 8; i++) {
-        board[6][i] = new chessPiece(fileLetters[i], 7, 'p', 'b')
+        board[i][6] = new chessPiece(fileLetters[i], 7, 'p', 'b')
     }
     
-    board[7][0] = new chessPiece('a', 8, 'r', 'b');
-    board[7][1] = new chessPiece('b', 8, 'n', 'b');
-    board[7][2] = new chessPiece('c', 8, 'b', 'b');
-    board[7][3] = new chessPiece('d', 8, 'q', 'b');
-    board[7][4] = new chessPiece('e', 8, 'k', 'b');
-    board[7][5] = new chessPiece('f', 8, 'b', 'b');
-    board[7][6] = new chessPiece('g', 8, 'n', 'b');
+    board[0][7] = new chessPiece('a', 8, 'r', 'b');
+    board[1][7] = new chessPiece('b', 8, 'n', 'b');
+    board[2][7] = new chessPiece('c', 8, 'b', 'b');
+    board[3][7] = new chessPiece('d', 8, 'q', 'b');
+    board[4][7] = new chessPiece('e', 8, 'k', 'b');
+    board[5][7] = new chessPiece('f', 8, 'b', 'b');
+    board[6][7] = new chessPiece('g', 8, 'n', 'b');
     board[7][7] = new chessPiece('h', 8, 'r', 'b');
 
     // Make the pieces actually show up
@@ -169,9 +169,13 @@ function clickSquare(e) {
     let tileClicked = elementClicked.id;
 
     if (currentMove[0] == undefined) {
-        // If there are no tiles selected for the current move, select this one
-        currentMove[0] = tileClicked;
-        elementClicked.classList.add('selected');
+        // If there are no tiles selected for the current move, select this one if there is a piece there
+        let position = notationToPosition(tileClicked);
+        
+        if (board[position['x']][position['y']]) {
+            currentMove[0] = tileClicked;
+            elementClicked.classList.add('selected');
+        }
     } else if (tileClicked == currentMove[0]) {
         // If this tile is already selected for the current move, deselect it
         currentMove = new Array(2);
