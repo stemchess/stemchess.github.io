@@ -41,6 +41,15 @@ class chessPiece {
         this.position = {x, y};
         this.type = type;
         this.color = color;
+
+        if (this.type == 'p') {
+            this.canDoubleMove = true;
+            this.canEP = false;
+        }
+
+        if (this.type == 'r' || this.type == 'k') {
+            this.canCastle = true;
+        }
     }
 }
 
