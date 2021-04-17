@@ -95,7 +95,7 @@ function resetBoard() {
     board[7][0] = new chessPiece('h', 1, 'r', 'w');
 
     // This allows us to quickly look up which file we are in from a number
-    let fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
     // These are full rows of (nearly) identical pawns, so it's fairly simple to just loop through them.
     for (let i = 0; i < 8; i++) {
@@ -129,7 +129,7 @@ resetBoard();
 // Converts notation (as used in the tile IDs) to numbers to reference the array
 function notationToPosition(notation) {
     // C.f. above
-    let fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
     let x = fileLetters.indexOf(notation[0]);
     let y = notation[1] - 1;
