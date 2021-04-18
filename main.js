@@ -28,6 +28,8 @@ let board = new Array();
 let previousMove = new Array(2);
 let currentMove = new Array(2);
 
+// Note if a piece can be en passant-ed
+let EP = '';
 
 /* BOARD SETUP */
 
@@ -155,6 +157,15 @@ function notationToPositionObject(notation) {
 }
 
 function movePiece() {
+    // TODO: make sure that the move is legal
+
+    // An en passant can only take place the next move (and taking care of this before anything actually changes is easier)
+    if (EP != '') {
+        let epPosition = notationToArrayIndex(EP);
+        board[epPosition['x']][epPosition['y']].canEP = false;
+        EP = '';
+    }
+    
     // Stop marking the previous move
     if (previousMove[0] != undefined) {
         // Unless it's also one of the current moves
@@ -174,9 +185,26 @@ function movePiece() {
     let endingElement = document.getElementById(currentMove[1]);
 
     // Move the piece on our JS representation of the board (overwriting anything that's already there)
+    // TODO: figure out if there is some way to do this by reference
     board[endingPosition['x']][endingPosition['y']] = board[startingPosition['x']][startingPosition['y']];
     board[endingPosition['x']][endingPosition['y']].position = notationToPositionObject(currentMove[1]);
     board[startingPosition['x']][startingPosition['y']] = undefined;
+
+    // A pawn cannot move two tiles after its first move
+    if (board[endingPosition['x']][endingPosition['y']].type == 'p') {
+        board[endingPosition['x']][endingPosition['y']].canDoubleMove = false;
+
+        // If the pawn moved two tiles, it can be en passant-ed the next move
+        if (Math.abs(endingPosition['y'] - startingPosition['y'] == 2)) {
+            board[endingPosition['x']][endingPosition['y']].canEP = true;
+            EP = currentMove[1];
+        }
+    }
+
+    // If the king or a rook moves, it can no longer castle
+    if (board[endingPosition['x']][endingPosition['y']].type == 'k' || board[endingPosition['x']][endingPosition['y']].type == 'r') {
+        board[endingPosition['x']][endingPosition['y']].canCastle = false;
+    }
 
     // Display the move
     endingElement.style.backgroundImage = startingElement.style.backgroundImage;
