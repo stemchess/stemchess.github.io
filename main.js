@@ -156,9 +156,11 @@ function notationToPositionObject(notation) {
     return {x, y};
 }
 
-function movePiece() {
-    // TODO: make sure that the move is legal
+function validateMove() {
+    return true;
+}
 
+function movePiece() {
     // An en passant can only take place the next move (and taking care of this before anything actually changes is easier)
     if (EP != '') {
         let epPosition = notationToArrayIndex(EP);
@@ -233,10 +235,13 @@ function clickSquare(e) {
         currentMove = new Array(2);
         elementClicked.classList.remove('selected');
     } else {
-        // If one other tile is alredy selected for the current move, select this one and move the selected piece
-        currentMove[1] = tileClicked;
-        elementClicked.classList.add('selected');
-        movePiece();
+        // If one other tile is alredy selected for the current move, check if the move is valid\
+        // If it is, select this tile and move the piece
+        if (validateMove()) {
+            currentMove[1] = tileClicked;
+            elementClicked.classList.add('selected');
+            movePiece();
+        }
     }
 }
 
