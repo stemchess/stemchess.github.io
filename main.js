@@ -105,7 +105,7 @@ function resetBoard() {
     board[6][0] = new chessPiece('g', 1, 'n', 'w');
     board[7][0] = new chessPiece('h', 1, 'r', 'w');
 
-    // This allows us to quickly look up which file we are in from a number
+    // This allows us to quickly look up which file we are in from a number (or vice versa)
     const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
     // These are full rows of (nearly) identical pawns, so it's fairly simple to just loop through them.
@@ -156,8 +156,37 @@ function notationToPositionObject(notation) {
     return {x, y};
 }
 
-function validateMove() {
-    return true;
+function validateMove(piece, target) {
+    let endingIndex = notationToArrayIndex(target);
+
+    // We cannot move to a tile with a piece of the same color on it
+    if (board[endingIndex['x']][endingIndex['y']] != undefined && board[endingIndex['x']][endingIndex['y']].color == piece.color) {
+        return false;
+    }
+
+    // Note the horizontal and vertical movement
+    let startingPosition = piece.position;
+    let endingPosition = notationToPositionObject(target);
+
+    let dx = endingPosition['x'] - startingPosition['x'];
+    let dy = endingPosition['y'] - startingPosition['y'];
+
+    switch(piece.type) {
+        case 'p':
+            return true;
+        case 'r':
+            return true;
+        case 'n':
+            return true;
+        case 'b':
+            return true;
+        case 'k':
+            return true;
+        case 'q':
+            return true;
+        default:
+            return false;
+    }
 }
 
 function movePiece() {
@@ -237,7 +266,9 @@ function clickSquare(e) {
     } else {
         // If one other tile is alredy selected for the current move, check if the move is valid\
         // If it is, select this tile and move the piece
-        if (validateMove()) {
+        let start = notationToArrayIndex(currentMove[0]);
+
+        if (validateMove(board[start['x']][start['y']], tileClicked)) {
             currentMove[1] = tileClicked;
             elementClicked.classList.add('selected');
             movePiece();
