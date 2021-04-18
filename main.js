@@ -192,8 +192,8 @@ function validateMove(piece, target) {
 function movePiece() {
     // An en passant can only take place the next move (and taking care of this before anything actually changes is easier)
     if (EP != '') {
-        let epPosition = notationToArrayIndex(EP);
-        board[epPosition['x']][epPosition['y']].canEP = false;
+        let epIndex = notationToArrayIndex(EP);
+        board[epIndex['x']][epIndex['y']].canEP = false;
         EP = '';
     }
     
@@ -209,32 +209,32 @@ function movePiece() {
     }
 
     // Convert a few things into more easily usable formats
-    let startingPosition = notationToArrayIndex(currentMove[0]);
-    let endingPosition = notationToArrayIndex(currentMove[1]);
+    let startingIndex = notationToArrayIndex(currentMove[0]);
+    let endingIndex = notationToArrayIndex(currentMove[1]);
 
     let startingElement = document.getElementById(currentMove[0]);
     let endingElement = document.getElementById(currentMove[1]);
 
     // Move the piece on our JS representation of the board (overwriting anything that's already there)
     // TODO: figure out if there is some way to do this by reference
-    board[endingPosition['x']][endingPosition['y']] = board[startingPosition['x']][startingPosition['y']];
-    board[endingPosition['x']][endingPosition['y']].position = notationToPositionObject(currentMove[1]);
-    board[startingPosition['x']][startingPosition['y']] = undefined;
+    board[endingIndex['x']][endingIndex['y']] = board[startingIndex['x']][startingIndex['y']];
+    board[endingIndex['x']][endingIndex['y']].position = notationToPositionObject(currentMove[1]);
+    board[startingIndex['x']][startingIndex['y']] = undefined;
 
     // A pawn cannot move two tiles after its first move
-    if (board[endingPosition['x']][endingPosition['y']].type == 'p') {
-        board[endingPosition['x']][endingPosition['y']].canDoubleMove = false;
+    if (board[endingIndex['x']][endingIndex['y']].type == 'p') {
+        board[endingIndex['x']][endingIndex['y']].canDoubleMove = false;
 
         // If the pawn moved two tiles, it can be en passant-ed the next move
-        if (Math.abs(endingPosition['y'] - startingPosition['y'] == 2)) {
-            board[endingPosition['x']][endingPosition['y']].canEP = true;
+        if (Math.abs(endingIndex['y'] - startingIndex['y'] == 2)) {
+            board[endingIndex['x']][endingIndex['y']].canEP = true;
             EP = currentMove[1];
         }
     }
 
     // If the king or a rook moves, it can no longer castle
-    if (board[endingPosition['x']][endingPosition['y']].type == 'k' || board[endingPosition['x']][endingPosition['y']].type == 'r') {
-        board[endingPosition['x']][endingPosition['y']].canCastle = false;
+    if (board[endingIndex['x']][endingIndex['y']].type == 'k' || board[endingIndex['x']][endingIndex['y']].type == 'r') {
+        board[endingIndex['x']][endingIndex['y']].canCastle = false;
     }
 
     // Display the move
@@ -253,9 +253,9 @@ function clickSquare(e) {
 
     if (currentMove[0] == undefined) {
         // If there are no tiles selected for the current move, select this one if there is a piece there
-        let position = notationToArrayIndex(tileClicked);
+        let index = notationToArrayIndex(tileClicked);
         
-        if (board[position['x']][position['y']]) {
+        if (board[index['x']][index['y']]) {
             currentMove[0] = tileClicked;
             elementClicked.classList.add('selected');
         }
@@ -266,9 +266,9 @@ function clickSquare(e) {
     } else {
         // If one other tile is alredy selected for the current move, check if the move is valid\
         // If it is, select this tile and move the piece
-        let start = notationToArrayIndex(currentMove[0]);
+        let startIndex = notationToArrayIndex(currentMove[0]);
 
-        if (validateMove(board[start['x']][start['y']], tileClicked)) {
+        if (validateMove(board[startIndex['x']][startIndex['y']], tileClicked)) {
             currentMove[1] = tileClicked;
             elementClicked.classList.add('selected');
             movePiece();
