@@ -151,7 +151,7 @@ function notationToArrayIndex(notation) {
 // Converts notation (as used in tile IDs) to an {x, y} object as stored in the representation of individual pieces
 function notationToPositionObject(notation) {
     let x = notation[0];
-    let y = notation[1];
+    let y = Number(notation[1]);
 
     return {x, y};
 }
@@ -167,13 +167,58 @@ function validateMove(piece, target) {
     // Note the horizontal and vertical movement
     let startingPosition = piece.position;
     let endingPosition = notationToPositionObject(target);
+    
+    // C.f. above
+    const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
-    let dx = endingPosition['x'] - startingPosition['x'];
+    let dx = fileLetters.indexOf(endingPosition['x']) - fileLetters.indexOf(startingPosition['x']);
     let dy = endingPosition['y'] - startingPosition['y'];
 
     switch(piece.type) {
         case 'p':
-            return true;
+            if (piece.color == 'b') {
+                // If a black piece is moving, flip this
+                // Usually this doesn't matter (we can just take the absolute value),
+                // but pawns can only move forward
+                dy = dy * -1;
+            }
+
+            if (dx == 0 && dy == 1) {
+                if (board[endingIndex['x']][endingIndex['y']] != undefined) {
+                    // Pawns can't capture forward
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            if (dx == 0 && dy == 2 && piece.canDoubleMove == true) {
+                if (board[endingIndex['x']][endingIndex['y']] != undefined) {
+                    // Pawns can't capture forward
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            let x = fileLetters.indexOf(piece.position.x) + dx;
+            let y = piece.position.y;
+
+            if (Math.abs(dx) == 1 && dy == 1 && board[x][y] != undefined) {
+                return true;
+            }
+
+            y = piece.position.y - 1;
+            
+            if (Math.abs(dx) == 1 && dy == 1 && board[x][y] != undefined && board[x][y].canEP == true && board[x][y].color != piece.color) {
+                document.getElementById(board[x][y].position.x + board[x][y].position.y).style.backgroundImage = 'unset';
+                board[x][y] = undefined;
+                EP = '';
+                return true;
+            }
+
+            return false;
+
         case 'r':
             return true;
         case 'n':
@@ -226,7 +271,7 @@ function movePiece() {
         board[endingIndex['x']][endingIndex['y']].canDoubleMove = false;
 
         // If the pawn moved two tiles, it can be en passant-ed the next move
-        if (Math.abs(endingIndex['y'] - startingIndex['y'] == 2)) {
+        if (Math.abs(endingIndex['y'] - startingIndex['y']) == 2) {
             board[endingIndex['x']][endingIndex['y']].canEP = true;
             EP = currentMove[1];
         }
