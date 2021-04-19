@@ -332,9 +332,15 @@ function validateMove(piece, target) {
             }
             return false;
         case 'k':
-            return true;
+            if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
+                return true;
+            }
+            return false;
         case 'q':
-            return true;
+            if (((dx == 0 || dy == 0) || (Math.abs(dx) == Math.abs(dy))) && piecesBetween(startingPosition, endingPosition) == false) {
+                return true;
+            }
+            return false;
         default:
             return false;
     }
