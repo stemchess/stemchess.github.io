@@ -274,14 +274,15 @@ function validateMove(piece, target) {
 
     switch(piece.type) {
         case 'p':
+            let forward = dy;
             if (piece.color == 'b') {
                 // If a black piece is moving, flip this
                 // Usually this doesn't matter (we can just take the absolute value),
                 // but pawns can only move forward
-                dy = dy * -1;
+                forward = dy * -1;
             }
 
-            if (dx == 0 && dy == 1) {
+            if (dx == 0 && forward == 1) {
                 if (board[endingIndex.x][endingIndex.y] != undefined) {
                     // Pawns can't capture forward
                     return false;
@@ -290,7 +291,7 @@ function validateMove(piece, target) {
                 }
             }
 
-            if (dx == 0 && dy == 2 && piece.canDoubleMove && piecesBetween(startingPosition, endingPosition) == false) {
+            if (dx == 0 && forward == 2 && piece.canDoubleMove && piecesBetween(startingPosition, endingPosition) == false) {
                 if (board[endingIndex.x][endingIndex.y] != undefined) {
                     // Pawns can't capture forward
                     return false;
@@ -300,9 +301,9 @@ function validateMove(piece, target) {
             }
 
             let x = fileLetters.indexOf(piece.position.x) + dx;
-            let y = piece.position.y;
+            let y = piece.position.y - 1 + dy;
 
-            if (Math.abs(dx) == 1 && dy == 1 && board[x][y] != undefined) {
+            if (Math.abs(dx) == 1 && forward == 1 && board[x][y] != undefined) {
                 return true;
             }
 
@@ -377,6 +378,8 @@ function movePiece() {
     board[endingIndex.x][endingIndex.y].position = notationToPositionObject(currentMove[1]);
     board[startingIndex.x][startingIndex.y] = undefined;
 
+    let promoted = false;
+
     // A pawn cannot move two tiles after its first move
     if (board[endingIndex.x][endingIndex.y].type == 'p') {
         board[endingIndex.x][endingIndex.y].canDoubleMove = false;
@@ -386,6 +389,16 @@ function movePiece() {
             board[endingIndex.x][endingIndex.y].canEP = true;
             EP = currentMove[1];
         }
+
+        // If a pawn is in the last rank, promote it to a queen
+        if (endingIndex.y == 0 || endingIndex.y == 7) {
+            let og = board[endingIndex.x][endingIndex.y];
+            board[endingIndex.x][endingIndex.y] = new chessPiece(og.position.x, og.position.y, 'q', og.color);
+
+            let imageURL = 'url("/images/q' + og.color + '.svg")';
+            endingElement.style.backgroundImage = imageURL;
+            promoted = true;
+        }
     }
 
     // If the king or a rook moves, it can no longer castle
@@ -394,7 +407,9 @@ function movePiece() {
     }
 
     // Display the move
-    endingElement.style.backgroundImage = startingElement.style.backgroundImage;
+    if (!promoted) {
+        endingElement.style.backgroundImage = startingElement.style.backgroundImage;
+    }
     startingElement.style.backgroundImage = '';
 
     // Set this to be the previous move and set the current to be empty
