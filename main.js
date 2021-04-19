@@ -65,7 +65,7 @@ function synchronizeBoardState() {
     // Set the background of all tiles to be blank
     let allTiles = document.getElementsByClassName('tile');
     for (let i = 0; i < allTiles.length; i++) {
-        allTiles[i].style.backgroundImage = ''
+        allTiles[i].style.backgroundImage = '';
     }
 
     // Loop through every space in the JS board and set background images accordingly
@@ -75,10 +75,10 @@ function synchronizeBoardState() {
                 let currentPiece = board[i][j];
                 
                 let currentPosition = currentPiece.position;
-                let currentNotation = currentPosition['x'] + String(currentPosition['y']);
+                let currentNotation = currentPosition.x + String(currentPosition.y);
                 let currentTile = document.getElementById(currentNotation);
 
-                let imageLocation = 'url("/images/' + currentPiece.type + currentPiece.color + '.svg")'
+                let imageLocation = 'url("/images/' + currentPiece.type + currentPiece.color + '.svg")';
 
                 currentTile.style.backgroundImage = imageLocation;
             } 
@@ -89,7 +89,7 @@ function synchronizeBoardState() {
 // This function resets the board.
 function resetBoard() {
     // Set the board to be empty (really only neccesary if there's anything already in it; i.e., not the first time)
-    board = []
+    board = [];
     // Create 8 rows of 8 (empty) items each
     for (let i = 0; i < 8; i++) {
         board[i] = new Array(8);
@@ -110,11 +110,11 @@ function resetBoard() {
 
     // These are full rows of (nearly) identical pawns, so it's fairly simple to just loop through them.
     for (let i = 0; i < 8; i++) {
-        board[i][1] = new chessPiece(fileLetters[i], 2, 'p', 'w')
+        board[i][1] = new chessPiece(fileLetters[i], 2, 'p', 'w');
     }
 
     for (let i = 0; i < 8; i++) {
-        board[i][6] = new chessPiece(fileLetters[i], 7, 'p', 'b')
+        board[i][6] = new chessPiece(fileLetters[i], 7, 'p', 'b');
     }
     
     board[0][7] = new chessPiece('a', 8, 'r', 'b');
@@ -156,11 +156,72 @@ function notationToPositionObject(notation) {
     return {x, y};
 }
 
+// Converts a position obect to numbers to reference the array
+function positionObjectToArrayIndex(position) {
+    // C.f. above
+    const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    
+    let x = fileLetters.indexOf(position.x);
+    let y = position.y - 1;
+
+    return {x, y};
+}
+
+function piecesBetween (start, end) {
+    let startIndex = positionObjectToArrayIndex(start);
+    let endIndex = positionObjectToArrayIndex(end);
+
+    let dx = endIndex.x - startIndex.x;
+    let dy = endIndex.y - startIndex.y;
+
+    // If the tiles are next to each other, there, will be nothing between them
+    if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
+        return false;
+    }
+
+    if (dx == 0) {
+        if (dy > 0) {
+            for (let i = 1; i < dy; i++) {
+                if (board[startIndex.x][startIndex.y + i]) {
+                    return true;
+                }
+            }
+        } else {
+            for (let i = -1; i > dy; i--) {
+                if (board[startIndex.x][startIndex.y + i]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    } else if (dy == 0) {
+        if (dx > 0) {
+            for (let i = 1; i < dx; i++) {
+                if (board[startIndex.x + i][startIndex.y]) {
+                    return true;
+                }
+            }
+        } else {
+            for (let i = -1; i > dx; i--) {
+                if (board[startIndex.x + i][startIndex.y]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    } else if (dx == dy) {
+
+    } else {
+        // Give up and tell whatever asked us to stop
+        return true;
+    }
+}
+
 function validateMove(piece, target) {
     let endingIndex = notationToArrayIndex(target);
 
     // We cannot move to a tile with a piece of the same color on it
-    if (board[endingIndex['x']][endingIndex['y']] != undefined && board[endingIndex['x']][endingIndex['y']].color == piece.color) {
+    if (board[endingIndex.x][endingIndex.y] != undefined && board[endingIndex.x][endingIndex.y].color == piece.color) {
         return false;
     }
 
@@ -171,8 +232,8 @@ function validateMove(piece, target) {
     // C.f. above
     const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
-    let dx = fileLetters.indexOf(endingPosition['x']) - fileLetters.indexOf(startingPosition['x']);
-    let dy = endingPosition['y'] - startingPosition['y'];
+    let dx = fileLetters.indexOf(endingPosition.x) - fileLetters.indexOf(startingPosition.x);
+    let dy = endingPosition.y - startingPosition.y;
 
     switch(piece.type) {
         case 'p':
@@ -184,7 +245,7 @@ function validateMove(piece, target) {
             }
 
             if (dx == 0 && dy == 1) {
-                if (board[endingIndex['x']][endingIndex['y']] != undefined) {
+                if (board[endingIndex.x][endingIndex.y] != undefined) {
                     // Pawns can't capture forward
                     return false;
                 } else {
@@ -192,8 +253,8 @@ function validateMove(piece, target) {
                 }
             }
 
-            if (dx == 0 && dy == 2 && piece.canDoubleMove == true) {
-                if (board[endingIndex['x']][endingIndex['y']] != undefined) {
+            if (dx == 0 && dy == 2 && piece.canDoubleMove && piecesBetween(startingPosition, endingPosition) == false) {
+                if (board[endingIndex.x][endingIndex.y] != undefined) {
                     // Pawns can't capture forward
                     return false;
                 } else {
@@ -210,7 +271,7 @@ function validateMove(piece, target) {
 
             y = piece.position.y - 1;
             
-            if (Math.abs(dx) == 1 && dy == 1 && board[x][y] != undefined && board[x][y].canEP == true && board[x][y].color != piece.color) {
+            if (Math.abs(dx) == 1 && dy == 1 && board[x][y] != undefined && board[x][y].canEP && board[x][y].color != piece.color) {
                 document.getElementById(board[x][y].position.x + board[x][y].position.y).style.backgroundImage = 'unset';
                 board[x][y] = undefined;
                 EP = '';
@@ -238,7 +299,7 @@ function movePiece() {
     // An en passant can only take place the next move (and taking care of this before anything actually changes is easier)
     if (EP != '') {
         let epIndex = notationToArrayIndex(EP);
-        board[epIndex['x']][epIndex['y']].canEP = false;
+        board[epIndex.x][epIndex.y].canEP = false;
         EP = '';
     }
     
@@ -261,25 +322,24 @@ function movePiece() {
     let endingElement = document.getElementById(currentMove[1]);
 
     // Move the piece on our JS representation of the board (overwriting anything that's already there)
-    // TODO: figure out if there is some way to do this by reference
-    board[endingIndex['x']][endingIndex['y']] = board[startingIndex['x']][startingIndex['y']];
-    board[endingIndex['x']][endingIndex['y']].position = notationToPositionObject(currentMove[1]);
-    board[startingIndex['x']][startingIndex['y']] = undefined;
+    board[endingIndex.x][endingIndex.y] = board[startingIndex.x][startingIndex.y];
+    board[endingIndex.x][endingIndex.y].position = notationToPositionObject(currentMove[1]);
+    board[startingIndex.x][startingIndex.y] = undefined;
 
     // A pawn cannot move two tiles after its first move
-    if (board[endingIndex['x']][endingIndex['y']].type == 'p') {
-        board[endingIndex['x']][endingIndex['y']].canDoubleMove = false;
+    if (board[endingIndex.x][endingIndex.y].type == 'p') {
+        board[endingIndex.x][endingIndex.y].canDoubleMove = false;
 
         // If the pawn moved two tiles, it can be en passant-ed the next move
-        if (Math.abs(endingIndex['y'] - startingIndex['y']) == 2) {
-            board[endingIndex['x']][endingIndex['y']].canEP = true;
+        if (Math.abs(endingIndex.y - startingIndex.y) == 2) {
+            board[endingIndex.x][endingIndex.y].canEP = true;
             EP = currentMove[1];
         }
     }
 
     // If the king or a rook moves, it can no longer castle
-    if (board[endingIndex['x']][endingIndex['y']].type == 'k' || board[endingIndex['x']][endingIndex['y']].type == 'r') {
-        board[endingIndex['x']][endingIndex['y']].canCastle = false;
+    if (board[endingIndex.x][endingIndex.y].type == 'k' || board[endingIndex.x][endingIndex.y].type == 'r') {
+        board[endingIndex.x][endingIndex.y].canCastle = false;
     }
 
     // Display the move
@@ -300,7 +360,7 @@ function clickSquare(e) {
         // If there are no tiles selected for the current move, select this one if there is a piece there
         let index = notationToArrayIndex(tileClicked);
         
-        if (board[index['x']][index['y']]) {
+        if (board[index.x][index.y]) {
             currentMove[0] = tileClicked;
             elementClicked.classList.add('selected');
         }
@@ -313,7 +373,7 @@ function clickSquare(e) {
         // If it is, select this tile and move the piece
         let startIndex = notationToArrayIndex(currentMove[0]);
 
-        if (validateMove(board[startIndex['x']][startIndex['y']], tileClicked)) {
+        if (validateMove(board[startIndex.x][startIndex.y], tileClicked)) {
             currentMove[1] = tileClicked;
             elementClicked.classList.add('selected');
             movePiece();
