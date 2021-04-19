@@ -180,6 +180,7 @@ function piecesBetween (start, end) {
     }
 
     if (dx == 0) {
+        // Vertical movement
         if (dy > 0) {
             for (let i = 1; i < dy; i++) {
                 if (board[startIndex.x][startIndex.y + i]) {
@@ -194,7 +195,9 @@ function piecesBetween (start, end) {
             }
         }
         return false;
+
     } else if (dy == 0) {
+        // Horizontal movement
         if (dx > 0) {
             for (let i = 1; i < dx; i++) {
                 if (board[startIndex.x + i][startIndex.y]) {
@@ -209,8 +212,42 @@ function piecesBetween (start, end) {
             }
         }
         return false;
-    } else if (dx == dy) {
 
+    } else if (Math.abs(dx) == Math.abs(dy)) {
+        // Diagonal movement
+        if (dx > 0 && dy > 0) {
+            for (let i = 1; i < dx; i++) {
+                if (board[startIndex.x + i][startIndex.y + i]) {
+                    return true;
+                }
+            }
+            return false;
+
+        } else if (dx < 0 && dy < 0) {
+            for (let i = -1; i > dx; i--) {
+                if (board[startIndex.x + i][startIndex.y + i]) {
+                    return true;
+                }
+            }
+            return false;
+
+        } else if (dx > 0 && dy < 0) {
+            for (let i = 1; i < dx; i++) {
+                if (board[startIndex.x + i][startIndex.y - i]) {
+                    return true;
+                }
+            }
+            return false;
+
+        } else if (dx < 0 && dy > 0) {
+            for (let i = 1; i < dy; i++) {
+                if (board[startIndex.x - i][startIndex.y + i]) {
+                    return true;
+                }
+            }
+            return false;
+
+        }
     } else {
         // Give up and tell whatever asked us to stop
         return true;
@@ -290,7 +327,10 @@ function validateMove(piece, target) {
             }
             return false;
         case 'b':
-            return true;
+            if (Math.abs(dx) == Math.abs(dy) && piecesBetween(startingPosition, endingPosition) == false) {
+                return true;
+            }
+            return false;
         case 'k':
             return true;
         case 'q':
