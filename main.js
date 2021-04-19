@@ -277,13 +277,18 @@ function validateMove(piece, target) {
                 EP = '';
                 return true;
             }
-
             return false;
 
         case 'r':
-            return true;
+            if ((dx == 0 || dy == 0) && piecesBetween(startingPosition, endingPosition) == false) {
+                return true;
+            }
+            return false;
         case 'n':
-            return true;
+            if ((Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1)) {
+                return true;
+            }
+            return false;
         case 'b':
             return true;
         case 'k':
