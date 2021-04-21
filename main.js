@@ -24,6 +24,9 @@ so I just used it everywhere so I don't have to convert it back and forth.
 // Create a representation of the board
 let board = new Array();
 
+// Note whose turn it is
+let colorToMove = 'w';
+
 // Note which spaces are currently selected, and which ones were selected in the previous move
 let previousMove = new Array(2);
 let currentMove = new Array(2);
@@ -406,6 +409,13 @@ function movePiece() {
         board[endingIndex.x][endingIndex.y].canCastle = false;
     }
 
+    // Change whose turn it is
+    if (colorToMove == 'w') {
+        colorToMove = 'b';
+    } else if (colorToMove == 'b') {
+        colorToMove = 'w';
+    }
+
     // Display the move
     if (!promoted) {
         endingElement.style.backgroundImage = startingElement.style.backgroundImage;
@@ -426,7 +436,7 @@ function clickSquare(e) {
         // If there are no tiles selected for the current move, select this one if there is a piece there
         let index = notationToArrayIndex(tileClicked);
         
-        if (board[index.x][index.y]) {
+        if (board[index.x][index.y] && board[index.x][index.y].color == colorToMove) {
             currentMove[0] = tileClicked;
             elementClicked.classList.add('selected');
         }
