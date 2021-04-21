@@ -50,11 +50,19 @@ a {
 }
 
 .light.selected {
-    background-color: #9ac;
+    background-color: #9ad;
 }
 
 .dark.selected {
-    background-color: #88a;
+    background-color: #88b;
+}
+
+.light.previous {
+    background-color: #9bc;
+}
+
+.dark.previous {
+    background-color: #8aa;
 }
 
 #labels {

@@ -360,13 +360,8 @@ function movePiece() {
     
     // Stop marking the previous move
     if (previousMove[0] != undefined) {
-        // Unless it's also one of the current moves
-        if (!currentMove.includes(previousMove[0])) {
-            document.getElementById(previousMove[0]).classList.remove('selected');            
-        }
-        if (!currentMove.includes(previousMove[1])) {
-            document.getElementById(previousMove[1]).classList.remove('selected');            
-        }
+        document.getElementById(previousMove[0]).classList.remove('previous');
+        document.getElementById(previousMove[1]).classList.remove('previous');
     }
 
     // Convert a few things into more easily usable formats
@@ -421,6 +416,13 @@ function movePiece() {
         endingElement.style.backgroundImage = startingElement.style.backgroundImage;
     }
     startingElement.style.backgroundImage = '';
+
+    // Change the background of the previous move
+    let previous = document.getElementsByClassName('selected');
+    previous[1].classList.add('previous');
+    previous[0].classList.add('previous');
+    previous[1].classList.remove('selected');
+    previous[0].classList.remove('selected');
 
     // Set this to be the previous move and set the current to be empty
     previousMove = currentMove;
