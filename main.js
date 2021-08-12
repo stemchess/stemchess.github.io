@@ -132,10 +132,31 @@ function resetBoardArray() {
     board[7][7] = new chessPiece('h', 8, 'r', 'b');
 }
 
+// Removes the highlight of the previous move
+// There isn't a particularly good place to put this function that both works and makes sense
+function unmarkPreviousMove() {
+    if (previousMove[0] != undefined) {
+        previousMove.forEach(move => document.getElementById(move).classList.remove('previous'));
+    }
+}
+
 // This function resets the board.
 function resetBoard() {
     // Reset the array
     resetBoardArray();
+
+    // Remove markings of the last move played (if any)
+    unmarkPreviousMove();
+
+    // Reset records of current and previous moves
+    previousMove = new Array(2);
+    currentMove = new Array(2);
+
+    // An en passant cannot occur from the initial game state
+    EP = '';
+
+    // White moves first
+    colorToMove = 'w';
 
     // Make the pieces actually show up
     // This is probably somewhat inefficient (as noted above), but it's simple.
@@ -363,9 +384,7 @@ function movePiece() {
     }
     
     // Stop marking the previous move
-    if (previousMove[0] != undefined) {
-        previousMove.forEach(move => document.getElementById(move).classList.remove('previous'));
-    }
+    unmarkPreviousMove();
 
     // Convert a few things into more easily usable formats
     let startingIndex = notationToArrayIndex(currentMove[0]);
