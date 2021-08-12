@@ -27,12 +27,17 @@ let board = new Array();
 // Note whose turn it is
 let colorToMove = 'w';
 
+// This allows us to quickly look up which file we are in from a number (or vice versa)
+// Used in a number of places
+const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
 // Note which spaces are currently selected, and which ones were selected in the previous move
 let previousMove = new Array(2);
 let currentMove = new Array(2);
 
 // Note if a piece can be en passant-ed
 let EP = '';
+
 
 /* BOARD SETUP */
 
@@ -49,7 +54,7 @@ class chessPiece {
 
         if (this.type == 'p') {
             this.canDoubleMove = true;
-            this.canEP = false;
+            this.canBeEnPassanted = false;
         }
 
         if (this.type == 'r' || this.type == 'k') {
@@ -59,10 +64,10 @@ class chessPiece {
 }
 
 /*
-This is a super inefficient way to do this (it loops through every single space on the board).
-It works.
+Reset the board visually by basically nuking everything and starting over (iterating over every element)
 
-(And most moves shouldn't use it)
+This is inefficient for most use cases, but it works and is the simplest solution for major changes.
+It is only used when the board is entirely reset.
 */
 function synchronizeBoardState() {
     // Set the background of all tiles to be blank
@@ -71,7 +76,7 @@ function synchronizeBoardState() {
         allTiles[i].style.backgroundImage = '';
     }
 
-    // Loop through every space in the JS board and set background images accordingly
+    // Loop through every space in the array and set background images accordingly
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             if (board[i][j]) {
@@ -89,8 +94,8 @@ function synchronizeBoardState() {
     }
 }
 
-// This function resets the board.
-function resetBoard() {
+// Resets the state of the array internally representing the board
+function resetBoardArray() {
     // Set the board to be empty (really only neccesary if there's anything already in it; i.e., not the first time)
     board = [];
     // Create 8 rows of 8 (empty) items each
@@ -107,9 +112,6 @@ function resetBoard() {
     board[5][0] = new chessPiece('f', 1, 'b', 'w');
     board[6][0] = new chessPiece('g', 1, 'n', 'w');
     board[7][0] = new chessPiece('h', 1, 'r', 'w');
-
-    // This allows us to quickly look up which file we are in from a number (or vice versa)
-    const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
     // These are full rows of (nearly) identical pawns, so it's fairly simple to just loop through them.
     for (let i = 0; i < 8; i++) {
@@ -128,13 +130,19 @@ function resetBoard() {
     board[5][7] = new chessPiece('f', 8, 'b', 'b');
     board[6][7] = new chessPiece('g', 8, 'n', 'b');
     board[7][7] = new chessPiece('h', 8, 'r', 'b');
+}
+
+// This function resets the board.
+function resetBoard() {
+    // Reset the array
+    resetBoardArray();
 
     // Make the pieces actually show up
     // This is probably somewhat inefficient (as noted above), but it's simple.
     synchronizeBoardState();
 }
 
-// Actually use the function above to reset the board
+// Use the function above to reset the board, bringing us to our initial state
 resetBoard();
 
 
@@ -142,9 +150,6 @@ resetBoard();
 
 // Converts notation (as used in tile IDs) to numbers to reference the array
 function notationToArrayIndex(notation) {
-    // C.f. above
-    const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-
     let x = fileLetters.indexOf(notation[0]);
     let y = notation[1] - 1;
 
@@ -161,9 +166,6 @@ function notationToPositionObject(notation) {
 
 // Converts a position obect to numbers to reference the array
 function positionObjectToArrayIndex(position) {
-    // C.f. above
-    const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    
     let x = fileLetters.indexOf(position.x);
     let y = position.y - 1;
 
@@ -268,9 +270,6 @@ function validateMove(piece, target) {
     // Note the horizontal and vertical movement
     let startingPosition = piece.position;
     let endingPosition = notationToPositionObject(target);
-    
-    // C.f. above
-    const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
     let dx = fileLetters.indexOf(endingPosition.x) - fileLetters.indexOf(startingPosition.x);
     let dy = endingPosition.y - startingPosition.y;
@@ -312,7 +311,7 @@ function validateMove(piece, target) {
 
             y = piece.position.y - 1;
             
-            if (Math.abs(dx) == 1 && dy == 1 && board[x][y] != undefined && board[x][y].canEP && board[x][y].color != piece.color) {
+            if (Math.abs(dx) == 1 && dy == 1 && board[x][y] != undefined && board[x][y].canBeEnPassanted && board[x][y].color != piece.color) {
                 document.getElementById(board[x][y].position.x + board[x][y].position.y).style.backgroundImage = 'unset';
                 board[x][y] = undefined;
                 EP = '';
@@ -325,26 +324,31 @@ function validateMove(piece, target) {
                 return true;
             }
             return false;
+
         case 'n':
             if ((Math.abs(dx) == 1 && Math.abs(dy) == 2) || (Math.abs(dx) == 2 && Math.abs(dy) == 1)) {
                 return true;
             }
             return false;
+
         case 'b':
             if (Math.abs(dx) == Math.abs(dy) && piecesBetween(startingPosition, endingPosition) == false) {
                 return true;
             }
             return false;
+
         case 'k':
             if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
                 return true;
             }
             return false;
+
         case 'q':
             if (((dx == 0 || dy == 0) || (Math.abs(dx) == Math.abs(dy))) && piecesBetween(startingPosition, endingPosition) == false) {
                 return true;
             }
             return false;
+            
         default:
             return false;
     }
@@ -354,14 +358,13 @@ function movePiece() {
     // An en passant can only take place the next move (and taking care of this before anything actually changes is easier)
     if (EP != '') {
         let epIndex = notationToArrayIndex(EP);
-        board[epIndex.x][epIndex.y].canEP = false;
+        board[epIndex.x][epIndex.y].canBeEnPassanted = false;
         EP = '';
     }
     
     // Stop marking the previous move
     if (previousMove[0] != undefined) {
-        document.getElementById(previousMove[0]).classList.remove('previous');
-        document.getElementById(previousMove[1]).classList.remove('previous');
+        previousMove.forEach(move => document.getElementById(move).classList.remove('previous'));
     }
 
     // Convert a few things into more easily usable formats
@@ -384,7 +387,7 @@ function movePiece() {
 
         // If the pawn moved two tiles, it can be en passant-ed the next move
         if (Math.abs(endingIndex.y - startingIndex.y) == 2) {
-            board[endingIndex.x][endingIndex.y].canEP = true;
+            board[endingIndex.x][endingIndex.y].canBeEnPassanted = true;
             EP = currentMove[1];
         }
 
@@ -429,8 +432,9 @@ function movePiece() {
     currentMove = new Array(2);
 }
 
-// This is the function that runs when a tile is clicked
+// This is the function that runs when the board is clicked
 function clickSquare(e) {
+    // Detect which tile was clicked
     let elementClicked = e.target;
     let tileClicked = elementClicked.id;
 
