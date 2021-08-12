@@ -148,7 +148,14 @@ function resetBoard() {
     // Remove markings of the last move played (if any)
     unmarkPreviousMove();
 
-    // Reset records of current and previous moves
+    // Remove the current selection
+    let currentSelection = document.getElementsByClassName('selected');
+    
+    if (currentSelection.length) {
+        currentSelection[0].classList.remove('selected');
+    }
+
+    // Reset records of the current and previous move
     previousMove = new Array(2);
     currentMove = new Array(2);
 
@@ -441,6 +448,8 @@ function movePiece() {
 
     // Change the background of the previous move
     let previous = document.getElementsByClassName('selected');
+
+    // Work from the end backward, as elements disappear once we change their class
     previous[1].classList.add('previous');
     previous[0].classList.add('previous');
     previous[1].classList.remove('selected');
@@ -483,4 +492,4 @@ function clickSquare(e) {
 }
 
 // Run a function when the board is clicked
-document.getElementById('board').addEventListener('click', clickSquare);
+document.getElementById('tiles').addEventListener('click', clickSquare);
