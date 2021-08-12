@@ -38,6 +38,8 @@ let currentMove = new Array(2);
 // Note if a piece can be en passant-ed
 let EP = '';
 
+// Note if a castling is underway
+let castling = false;
 
 /* BOARD SETUP */
 
@@ -135,8 +137,9 @@ function resetBoardArray() {
 // Removes the highlight of the previous move
 // There isn't a particularly good place to put this function that both works and makes sense
 function unmarkPreviousMove() {
-    if (previousMove[0] != undefined) {
-        previousMove.forEach(move => document.getElementById(move).classList.remove('previous'));
+    let oldHighlightedMoves = document.getElementsByClassName('previous');
+    if (oldHighlightedMoves.length) {
+        Array.from(oldHighlightedMoves).forEach(move => move.classList.remove('previous'));
     }
 }
 
@@ -368,6 +371,33 @@ function validateMove(piece, target) {
         case 'k':
             if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
                 return true;
+            } else if (piece.canCastle) {
+                if (piece.color == 'w') {
+                    if (target == 'c1') {
+                        if (board[0][0] != undefined && board[0][0].canCastle && piecesBetween(startingPosition, notationToPositionObject('a1')) == false) {
+                            castling = true;
+                            return true;
+                        }
+                    } else if (target == 'g1') {
+                        if (board[7][0] != undefined && board[7][0].canCastle && piecesBetween(startingPosition, notationToPositionObject('h1')) == false) {
+                            castling = true;
+                            return true;
+                        }
+                    }
+                } else {
+                    if (target == 'c8') {
+                        if (board[0][7] != undefined && board[0][7].canCastle && piecesBetween(startingPosition, notationToPositionObject('a8')) == false) {
+                            castling = true;
+                            return true;
+                        }
+                    } else if (target == 'g8') {
+                        if (board[7][7] != undefined && board[7][7].canCastle && piecesBetween(startingPosition, notationToPositionObject('h8')) == false) {
+                            castling = true;
+                            return true;
+                        }
+
+                    }
+                }
             }
             return false;
 
@@ -382,7 +412,7 @@ function validateMove(piece, target) {
     }
 }
 
-function movePiece() {
+function movePiece(secondMove = false) {
     // An en passant can only take place the next move (and taking care of this before anything actually changes is easier)
     if (EP != '') {
         let epIndex = notationToArrayIndex(EP);
@@ -390,8 +420,10 @@ function movePiece() {
         EP = '';
     }
     
-    // Stop marking the previous move
-    unmarkPreviousMove();
+    if (!secondMove) {
+        // Stop marking the previous move
+        unmarkPreviousMove();
+    }
 
     // Convert a few things into more easily usable formats
     let startingIndex = notationToArrayIndex(currentMove[0]);
@@ -433,11 +465,13 @@ function movePiece() {
         board[endingIndex.x][endingIndex.y].canCastle = false;
     }
 
-    // Change whose turn it is
-    if (colorToMove == 'w') {
-        colorToMove = 'b';
-    } else if (colorToMove == 'b') {
-        colorToMove = 'w';
+    if (!secondMove) {
+        // Change whose turn it is
+        if (colorToMove == 'w') {
+            colorToMove = 'b';
+        } else if (colorToMove == 'b') {
+            colorToMove = 'w';
+        }
     }
 
     // Display the move
@@ -446,18 +480,48 @@ function movePiece() {
     }
     startingElement.style.backgroundImage = '';
 
-    // Change the background of the previous move
-    let previous = document.getElementsByClassName('selected');
+    if (!secondMove) {
+        // Change the background of the previous move
+        let previous = document.getElementsByClassName('selected');
 
-    // Work from the end backward, as elements disappear once we change their class
-    previous[1].classList.add('previous');
-    previous[0].classList.add('previous');
-    previous[1].classList.remove('selected');
-    previous[0].classList.remove('selected');
+        // Work from the end backward, as elements disappear once we change their class
+        previous[1].classList.add('previous');
+        previous[0].classList.add('previous');
+        previous[1].classList.remove('selected');
+        previous[0].classList.remove('selected');
+    }
 
     // Set this to be the previous move and set the current to be empty
     previousMove = currentMove;
     currentMove = new Array(2);
+
+    if (castling) {
+        castling = false;
+        switch (previousMove[1]) {
+            case 'c1':
+                currentMove[0] = 'a1'
+                currentMove[1] = 'd1'
+                break;
+            case 'g1':
+                currentMove[0] = 'h1'
+                currentMove[1] = 'f1'
+                break;
+            case 'c8':
+                currentMove[0] = 'a8'
+                currentMove[1] = 'd8'
+                break;
+            case 'g8':
+                currentMove[0] = 'h8'
+                currentMove[1] = 'f8'
+                break;
+            }
+
+        movePiece(true);
+
+        // Highlight the rook as well
+        document.getElementById(previousMove[0]).classList.add('previous');
+        document.getElementById(previousMove[1]).classList.add('previous');
+    }
 }
 
 // This is the function that runs when the board is clicked
