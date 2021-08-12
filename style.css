@@ -11,7 +11,7 @@ html {
 }
 
 a {
-    color: #000;
+    color: #444;
 }
 
 #header {
@@ -94,6 +94,17 @@ a {
     width: 10vmin;
     height: 10vmin;
     background-color: unset !important;
+}
+
+#changelog {
+    padding: 1em;
+    font-size: 1.2em;
+    line-height: 1.5;
+    font-family: sans-serif;
+}
+
+ul {
+    margin: 0;
 }
 
 #footer {
