@@ -1,4 +1,4 @@
-"use strict"
+'use strict';
 
 /*
 Cheat sheet for those unfamiliar with chess
@@ -22,7 +22,7 @@ so I just used it everywhere so I don't have to convert it back and forth.
 /* GLOBAL VARIABLE DECLARATION */
 
 // Create a representation of the board
-let board = new Array();
+let board = [];
 
 // Note whose turn it is
 let colorToMove = 'w';
@@ -46,11 +46,10 @@ let castling = false;
 /*
 This class takes variuos characteristics and turns them into an "object".
 We can use this to create an object for each piece, but with a lot of shared characteristics to avoid repetition.
-The widespread use of objects led to something called "object-oriented programming" and it was a thing or something.
 */
 class chessPiece {
-    constructor(x, y, type, color) {
-        this.position = {x, y};
+    constructor(notation, type, color) {
+        this.position = notation;
         this.type = type;
         this.color = color;
 
@@ -84,8 +83,7 @@ function synchronizeBoardState() {
             if (board[i][j]) {
                 let currentPiece = board[i][j];
                 
-                let currentPosition = currentPiece.position;
-                let currentNotation = currentPosition.x + String(currentPosition.y);
+                let currentNotation = currentPiece.position;
                 let currentTile = document.getElementById(currentNotation);
 
                 let imageLocation = 'url("/images/' + currentPiece.type + currentPiece.color + '.svg")';
@@ -100,38 +98,39 @@ function synchronizeBoardState() {
 function resetBoardArray() {
     // Set the board to be empty (really only neccesary if there's anything already in it; i.e., not the first time)
     board = [];
+
     // Create 8 rows of 8 (empty) items each
     for (let i = 0; i < 8; i++) {
         board[i] = new Array(8);
     }
 
     // Set all of the initial pieces on the board
-    board[0][0] = new chessPiece('a', 1, 'r', 'w');
-    board[1][0] = new chessPiece('b', 1, 'n', 'w');
-    board[2][0] = new chessPiece('c', 1, 'b', 'w');
-    board[3][0] = new chessPiece('d', 1, 'q', 'w');
-    board[4][0] = new chessPiece('e', 1, 'k', 'w');
-    board[5][0] = new chessPiece('f', 1, 'b', 'w');
-    board[6][0] = new chessPiece('g', 1, 'n', 'w');
-    board[7][0] = new chessPiece('h', 1, 'r', 'w');
+    board[0][0] = new chessPiece('a1', 'r', 'w');
+    board[1][0] = new chessPiece('b1', 'n', 'w');
+    board[2][0] = new chessPiece('c1', 'b', 'w');
+    board[3][0] = new chessPiece('d1', 'q', 'w');
+    board[4][0] = new chessPiece('e1', 'k', 'w');
+    board[5][0] = new chessPiece('f1', 'b', 'w');
+    board[6][0] = new chessPiece('g1', 'n', 'w');
+    board[7][0] = new chessPiece('h1', 'r', 'w');
 
     // These are full rows of (nearly) identical pawns, so it's fairly simple to just loop through them.
     for (let i = 0; i < 8; i++) {
-        board[i][1] = new chessPiece(fileLetters[i], 2, 'p', 'w');
+        board[i][1] = new chessPiece(fileLetters[i] + '2', 'p', 'w');
     }
 
     for (let i = 0; i < 8; i++) {
-        board[i][6] = new chessPiece(fileLetters[i], 7, 'p', 'b');
+        board[i][6] = new chessPiece(fileLetters[i] + '7', 'p', 'b');
     }
     
-    board[0][7] = new chessPiece('a', 8, 'r', 'b');
-    board[1][7] = new chessPiece('b', 8, 'n', 'b');
-    board[2][7] = new chessPiece('c', 8, 'b', 'b');
-    board[3][7] = new chessPiece('d', 8, 'q', 'b');
-    board[4][7] = new chessPiece('e', 8, 'k', 'b');
-    board[5][7] = new chessPiece('f', 8, 'b', 'b');
-    board[6][7] = new chessPiece('g', 8, 'n', 'b');
-    board[7][7] = new chessPiece('h', 8, 'r', 'b');
+    board[0][7] = new chessPiece('a8', 'r', 'b');
+    board[1][7] = new chessPiece('b8', 'n', 'b');
+    board[2][7] = new chessPiece('c8', 'b', 'b');
+    board[3][7] = new chessPiece('d8', 'q', 'b');
+    board[4][7] = new chessPiece('e8', 'k', 'b');
+    board[5][7] = new chessPiece('f8', 'b', 'b');
+    board[6][7] = new chessPiece('g8', 'n', 'b');
+    board[7][7] = new chessPiece('h8', 'r', 'b');
 }
 
 // Removes the highlight of the previous move
@@ -187,25 +186,9 @@ function notationToArrayIndex(notation) {
     return {x, y};
 }
 
-// Converts notation (as used in tile IDs) to an {x, y} object as stored in the representation of individual pieces
-function notationToPositionObject(notation) {
-    let x = notation[0];
-    let y = Number(notation[1]);
-
-    return {x, y};
-}
-
-// Converts a position obect to numbers to reference the array
-function positionObjectToArrayIndex(position) {
-    let x = fileLetters.indexOf(position.x);
-    let y = position.y - 1;
-
-    return {x, y};
-}
-
-function piecesBetween (start, end) {
-    let startIndex = positionObjectToArrayIndex(start);
-    let endIndex = positionObjectToArrayIndex(end);
+function piecesBetween(start, end) {
+    let startIndex = notationToArrayIndex(start);
+    let endIndex = notationToArrayIndex(end);
 
     let dx = endIndex.x - startIndex.x;
     let dy = endIndex.y - startIndex.y;
@@ -290,23 +273,23 @@ function piecesBetween (start, end) {
     }
 }
 
-function validateMove(piece, target) {
-    let endingIndex = notationToArrayIndex(target);
+function validateMove(piece, endingPosition) {
+    let startingPosition = piece.position;
+
+    let startingIndex = notationToArrayIndex(startingPosition);
+    let endingIndex = notationToArrayIndex(endingPosition);
 
     // We cannot move to a tile with a piece of the same color on it
     if (board[endingIndex.x][endingIndex.y] != undefined && board[endingIndex.x][endingIndex.y].color == piece.color) {
         return false;
     }
 
-    // Note the horizontal and vertical movement
-    let startingPosition = piece.position;
-    let endingPosition = notationToPositionObject(target);
-
-    let dx = fileLetters.indexOf(endingPosition.x) - fileLetters.indexOf(startingPosition.x);
-    let dy = endingPosition.y - startingPosition.y;
+    let dx = endingIndex.x - startingIndex.x;
+    let dy = endingIndex.y - startingIndex.y;
 
     switch(piece.type) {
         case 'p':
+            {
             let forward = dy;
             if (piece.color == 'b') {
                 // If a black piece is moving, flip this
@@ -333,22 +316,23 @@ function validateMove(piece, target) {
                 }
             }
 
-            let x = fileLetters.indexOf(piece.position.x) + dx;
-            let y = piece.position.y - 1 + dy;
+            let x = endingIndex.x;
+            let y = endingIndex.y;
 
             if (Math.abs(dx) == 1 && forward == 1 && board[x][y] != undefined) {
                 return true;
             }
 
-            y = piece.position.y - 1;
+            y = startingIndex.y;
             
-            if (Math.abs(dx) == 1 && dy == 1 && board[x][y] != undefined && board[x][y].canBeEnPassanted && board[x][y].color != piece.color) {
-                document.getElementById(board[x][y].position.x + board[x][y].position.y).style.backgroundImage = 'unset';
+            if (Math.abs(dx) == 1 && forward == 1 && board[x][y] != undefined && board[x][y].canBeEnPassanted && board[x][y].color != piece.color) {
+                document.getElementById(board[x][y].position).style.backgroundImage = 'unset';
                 board[x][y] = undefined;
                 EP = '';
                 return true;
             }
             return false;
+            }
 
         case 'r':
             if ((dx == 0 || dy == 0) && piecesBetween(startingPosition, endingPosition) == false) {
@@ -373,25 +357,25 @@ function validateMove(piece, target) {
                 return true;
             } else if (piece.canCastle) {
                 if (piece.color == 'w') {
-                    if (target == 'c1') {
-                        if (board[0][0] != undefined && board[0][0].canCastle && piecesBetween(startingPosition, notationToPositionObject('a1')) == false) {
+                    if (endingPosition == 'c1') {
+                        if (board[0][0] != undefined && board[0][0].canCastle && piecesBetween(startingPosition, 'a1') == false) {
                             castling = true;
                             return true;
                         }
-                    } else if (target == 'g1') {
-                        if (board[7][0] != undefined && board[7][0].canCastle && piecesBetween(startingPosition, notationToPositionObject('h1')) == false) {
+                    } else if (endingPosition == 'g1') {
+                        if (board[7][0] != undefined && board[7][0].canCastle && piecesBetween(startingPosition, 'h1') == false) {
                             castling = true;
                             return true;
                         }
                     }
                 } else {
-                    if (target == 'c8') {
-                        if (board[0][7] != undefined && board[0][7].canCastle && piecesBetween(startingPosition, notationToPositionObject('a8')) == false) {
+                    if (endingPosition == 'c8') {
+                        if (board[0][7] != undefined && board[0][7].canCastle && piecesBetween(startingPosition, 'a8') == false) {
                             castling = true;
                             return true;
                         }
-                    } else if (target == 'g8') {
-                        if (board[7][7] != undefined && board[7][7].canCastle && piecesBetween(startingPosition, notationToPositionObject('h8')) == false) {
+                    } else if (endingPosition == 'g8') {
+                        if (board[7][7] != undefined && board[7][7].canCastle && piecesBetween(startingPosition, 'h8') == false) {
                             castling = true;
                             return true;
                         }
@@ -434,7 +418,7 @@ function movePiece(secondMove = false) {
 
     // Move the piece on our JS representation of the board (overwriting anything that's already there)
     board[endingIndex.x][endingIndex.y] = board[startingIndex.x][startingIndex.y];
-    board[endingIndex.x][endingIndex.y].position = notationToPositionObject(currentMove[1]);
+    board[endingIndex.x][endingIndex.y].position = currentMove[1];
     board[startingIndex.x][startingIndex.y] = undefined;
 
     let promoted = false;
@@ -451,10 +435,10 @@ function movePiece(secondMove = false) {
 
         // If a pawn is in the last rank, promote it to a queen
         if (endingIndex.y == 0 || endingIndex.y == 7) {
-            let og = board[endingIndex.x][endingIndex.y];
-            board[endingIndex.x][endingIndex.y] = new chessPiece(og.position.x, og.position.y, 'q', og.color);
+            let original = board[endingIndex.x][endingIndex.y];
+            board[endingIndex.x][endingIndex.y] = new chessPiece(original.position, 'q', original.color);
 
-            let imageURL = 'url("/images/q' + og.color + '.svg")';
+            let imageURL = 'url("/images/q' + original.color + '.svg")';
             endingElement.style.backgroundImage = imageURL;
             promoted = true;
         }
@@ -499,20 +483,20 @@ function movePiece(secondMove = false) {
         castling = false;
         switch (previousMove[1]) {
             case 'c1':
-                currentMove[0] = 'a1'
-                currentMove[1] = 'd1'
+                currentMove[0] = 'a1';
+                currentMove[1] = 'd1';
                 break;
             case 'g1':
-                currentMove[0] = 'h1'
-                currentMove[1] = 'f1'
+                currentMove[0] = 'h1';
+                currentMove[1] = 'f1';
                 break;
             case 'c8':
-                currentMove[0] = 'a8'
-                currentMove[1] = 'd8'
+                currentMove[0] = 'a8';
+                currentMove[1] = 'd8';
                 break;
             case 'g8':
-                currentMove[0] = 'h8'
-                currentMove[1] = 'f8'
+                currentMove[0] = 'h8';
+                currentMove[1] = 'f8';
                 break;
             }
 
