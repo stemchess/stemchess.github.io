@@ -186,6 +186,17 @@ function notationToArrayIndex(notation) {
     return {x, y};
 }
 
+function flipColor(color) {
+    switch (color) {
+        case 'w':
+            return 'b';
+        case 'b':
+            return 'w';
+        default:
+            throw 'Invalid color';
+    }
+}
+
 function piecesBetween(start, end) {
     let startIndex = notationToArrayIndex(start);
     let endIndex = notationToArrayIndex(end);
@@ -273,7 +284,7 @@ function piecesBetween(start, end) {
     }
 }
 
-function validateMove(piece, endingPosition) {
+function validateMove(piece, endingPosition, attacking = false) {
     let startingPosition = piece.position;
 
     let startingIndex = notationToArrayIndex(startingPosition);
@@ -287,7 +298,7 @@ function validateMove(piece, endingPosition) {
     let dx = endingIndex.x - startingIndex.x;
     let dy = endingIndex.y - startingIndex.y;
 
-    switch(piece.type) {
+    switch (piece.type) {
         case 'p':
             {
             let forward = dy;
@@ -299,7 +310,7 @@ function validateMove(piece, endingPosition) {
             }
 
             if (dx == 0 && forward == 1) {
-                if (board[endingIndex.x][endingIndex.y] != undefined) {
+                if (board[endingIndex.x][endingIndex.y] != undefined || attacking) {
                     // Pawns can't capture forward
                     return false;
                 } else {
@@ -308,7 +319,7 @@ function validateMove(piece, endingPosition) {
             }
 
             if (dx == 0 && forward == 2 && piece.canDoubleMove && piecesBetween(startingPosition, endingPosition) == false) {
-                if (board[endingIndex.x][endingIndex.y] != undefined) {
+                if (board[endingIndex.x][endingIndex.y] != undefined || attacking) {
                     // Pawns can't capture forward
                     return false;
                 } else {
@@ -319,16 +330,18 @@ function validateMove(piece, endingPosition) {
             let x = endingIndex.x;
             let y = endingIndex.y;
 
-            if (Math.abs(dx) == 1 && forward == 1 && board[x][y] != undefined) {
+            if (Math.abs(dx) == 1 && forward == 1 && (board[x][y] != undefined || attacking)) {
                 return true;
             }
 
             y = startingIndex.y;
             
             if (Math.abs(dx) == 1 && forward == 1 && board[x][y] != undefined && board[x][y].canBeEnPassanted && board[x][y].color != piece.color) {
-                document.getElementById(board[x][y].position).style.backgroundImage = 'unset';
-                board[x][y] = undefined;
-                EP = '';
+                if (!attacking) {
+                    document.getElementById(board[x][y].position).style.backgroundImage = 'unset';
+                    board[x][y] = undefined;
+                    EP = '';
+                }
                 return true;
             }
             return false;
@@ -355,7 +368,7 @@ function validateMove(piece, endingPosition) {
         case 'k':
             if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
                 return true;
-            } else if (piece.canCastle) {
+            } else if (piece.canCastle && !attacking) {
                 if (piece.color == 'w') {
                     if (endingPosition == 'c1') {
                         if (board[0][0] != undefined && board[0][0].canCastle && piecesBetween(startingPosition, 'a1') == false) {
@@ -368,7 +381,7 @@ function validateMove(piece, endingPosition) {
                             return true;
                         }
                     }
-                } else {
+                } else if (piece.color == 'b') {
                     if (endingPosition == 'c8') {
                         if (board[0][7] != undefined && board[0][7].canCastle && piecesBetween(startingPosition, 'a8') == false) {
                             castling = true;
@@ -379,7 +392,6 @@ function validateMove(piece, endingPosition) {
                             castling = true;
                             return true;
                         }
-
                     }
                 }
             }
@@ -394,6 +406,24 @@ function validateMove(piece, endingPosition) {
         default:
             return false;
     }
+}
+
+function isAttacking(attackingColor, attackedTile) {
+
+    let indices = notationToArrayIndex(attackedTile);
+    if (board[indices.x][indices.y] != undefined && board[indices.x][indices.y].color == attackingColor) {
+        return false;
+    }
+
+    return board.some(file => {
+        return file.some(tile => {
+            if (tile != undefined && tile.color == attackingColor) {
+                if (validateMove(tile, attackedTile, true)) {
+                    return true;
+                }
+            }
+        });
+    });
 }
 
 function movePiece(secondMove = false) {
@@ -451,11 +481,7 @@ function movePiece(secondMove = false) {
 
     if (!secondMove) {
         // Change whose turn it is
-        if (colorToMove == 'w') {
-            colorToMove = 'b';
-        } else if (colorToMove == 'b') {
-            colorToMove = 'w';
-        }
+        colorToMove = flipColor(colorToMove);
     }
 
     // Display the move
