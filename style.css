@@ -15,9 +15,9 @@ a {
 }
 
 #header {
-    font-size: 6em;
+    font-size: 16vmin;
     font-family: sans-serif;
-    padding: 0.2em;
+    padding: 2.5vmin;
     background-image: url(/images/header.jpg);
     height: 25vmin;
     background-position: center;
