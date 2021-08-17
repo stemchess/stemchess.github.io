@@ -79,8 +79,8 @@ a {
 
 #ranks {
     width: 10vmin;
-    top: 1.6vmin;
-    left: 0.4vmin;
+    top: 1.5vmin;
+    left: 0.35vmin;
     position: absolute;
 }
 
@@ -88,8 +88,13 @@ a {
     text-align: right;
     position: absolute;
     top: 78.6vmin;
-    left: -0.4vmin;
+    left: -0.32vmin;
     width: 80vmin;
+}
+
+#files > :nth-child(7) {
+    position: relative;
+    top: -0.3vmin;
 }
 
 .label {
