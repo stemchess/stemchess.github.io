@@ -372,25 +372,33 @@ function validateMove(piece, endingPosition, attacking = false) {
                 if (piece.color == 'w') {
                     if (endingPosition == 'c1') {
                         if (board[0][0] != undefined && board[0][0].canCastle && piecesBetween(startingPosition, 'a1') == false) {
-                            castling = true;
-                            return true;
+                            if (!(isAttacking(piece.color, 'c1') || isAttacking(piece.color, 'd1') || isAttacking(piece.color, 'e1'))) {
+                                castling = true;
+                                return true;
+                            }
                         }
                     } else if (endingPosition == 'g1') {
                         if (board[7][0] != undefined && board[7][0].canCastle && piecesBetween(startingPosition, 'h1') == false) {
-                            castling = true;
-                            return true;
+                            if (!(isAttacking(piece.color, 'e1') || isAttacking(piece.color, 'f1') || isAttacking(piece.color, 'g1'))) {
+                                castling = true;
+                                return true;
+                            }
                         }
                     }
                 } else if (piece.color == 'b') {
                     if (endingPosition == 'c8') {
                         if (board[0][7] != undefined && board[0][7].canCastle && piecesBetween(startingPosition, 'a8') == false) {
-                            castling = true;
-                            return true;
+                            if (!(isAttacking(piece.color, 'c8') || isAttacking(piece.color, 'd8') || isAttacking(piece.color, 'e8'))) {
+                                castling = true;
+                                return true;
+                            }
                         }
                     } else if (endingPosition == 'g8') {
                         if (board[7][7] != undefined && board[7][7].canCastle && piecesBetween(startingPosition, 'h8') == false) {
-                            castling = true;
-                            return true;
+                            if (!(isAttacking(piece.color, 'e8') || isAttacking(piece.color, 'f8') || isAttacking(piece.color, 'g8'))) {
+                                castling = true;
+                                return true;
+                            }
                         }
                     }
                 }
@@ -408,7 +416,8 @@ function validateMove(piece, endingPosition, attacking = false) {
     }
 }
 
-function isAttacking(attackingColor, attackedTile) {
+function isAttacking(attackedColor, attackedTile) {
+    let attackingColor = flipColor(attackedColor);
 
     let indices = notationToArrayIndex(attackedTile);
     if (board[indices.x][indices.y] != undefined && board[indices.x][indices.y].color == attackingColor) {
