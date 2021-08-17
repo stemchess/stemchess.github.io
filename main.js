@@ -27,6 +27,9 @@ let board = [];
 // Note whose turn it is
 let colorToMove = 'w';
 
+// Note where the kings are
+let kingLocations = {};
+
 // This allows us to quickly look up which file we are in from a number (or vice versa)
 // Used in a number of places
 const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -160,6 +163,10 @@ function resetBoard() {
     // Reset records of the current and previous move
     previousMove = new Array(2);
     currentMove = new Array(2);
+
+    // Return the kings to their initial positions
+    kingLocations.w = 'e1';
+    kingLocations.b = 'e8';
 
     // An en passant cannot occur from the initial game state
     EP = '';
@@ -486,6 +493,10 @@ function movePiece(secondMove = false) {
     // If the king or a rook moves, it can no longer castle
     if (board[endingIndex.x][endingIndex.y].type == 'k' || board[endingIndex.x][endingIndex.y].type == 'r') {
         board[endingIndex.x][endingIndex.y].canCastle = false;
+    }
+
+    if (board[endingIndex.x][endingIndex.y].type == 'k') {
+        kingLocations[board[endingIndex.x][endingIndex.y].color] = currentMove[1];
     }
 
     if (!secondMove) {
