@@ -380,14 +380,14 @@ function validateMove(piece, endingPosition, attacking = false) {
                 if (piece.color == 'w') {
                     if (endingPosition == 'c1') {
                         if (board[0][0] != undefined && board[0][0].canCastle && piecesBetween(startingPosition, 'a1') == false) {
-                            if (!(isAttacking(piece.color, 'c1') || isAttacking(piece.color, 'd1') || isAttacking(piece.color, 'e1'))) {
+                            if (!(isAttacked(piece.color, 'c1') || isAttacked(piece.color, 'd1') || isAttacked(piece.color, 'e1'))) {
                                 castling = true;
                                 return true;
                             }
                         }
                     } else if (endingPosition == 'g1') {
                         if (board[7][0] != undefined && board[7][0].canCastle && piecesBetween(startingPosition, 'h1') == false) {
-                            if (!(isAttacking(piece.color, 'e1') || isAttacking(piece.color, 'f1') || isAttacking(piece.color, 'g1'))) {
+                            if (!(isAttacked(piece.color, 'e1') || isAttacked(piece.color, 'f1') || isAttacked(piece.color, 'g1'))) {
                                 castling = true;
                                 return true;
                             }
@@ -396,14 +396,14 @@ function validateMove(piece, endingPosition, attacking = false) {
                 } else if (piece.color == 'b') {
                     if (endingPosition == 'c8') {
                         if (board[0][7] != undefined && board[0][7].canCastle && piecesBetween(startingPosition, 'a8') == false) {
-                            if (!(isAttacking(piece.color, 'c8') || isAttacking(piece.color, 'd8') || isAttacking(piece.color, 'e8'))) {
+                            if (!(isAttacked(piece.color, 'c8') || isAttacked(piece.color, 'd8') || isAttacked(piece.color, 'e8'))) {
                                 castling = true;
                                 return true;
                             }
                         }
                     } else if (endingPosition == 'g8') {
                         if (board[7][7] != undefined && board[7][7].canCastle && piecesBetween(startingPosition, 'h8') == false) {
-                            if (!(isAttacking(piece.color, 'e8') || isAttacking(piece.color, 'f8') || isAttacking(piece.color, 'g8'))) {
+                            if (!(isAttacked(piece.color, 'e8') || isAttacked(piece.color, 'f8') || isAttacked(piece.color, 'g8'))) {
                                 castling = true;
                                 return true;
                             }
@@ -424,7 +424,7 @@ function validateMove(piece, endingPosition, attacking = false) {
     }
 }
 
-function isAttacking(attackedColor, attackedTile) {
+function isAttacked(attackedColor, attackedTile) {
     let attackingColor = flipColor(attackedColor);
 
     let indices = notationToArrayIndex(attackedTile);
@@ -505,7 +505,7 @@ function movePiece(secondMove = false) {
         colorToMove = flipColor(colorToMove);
     }
 
-    if (isAttacking(colorToMove, kingLocations[colorToMove])) {
+    if (isAttacked(colorToMove, kingLocations[colorToMove])) {
         checked = true;
     } else {
         checked = false;
