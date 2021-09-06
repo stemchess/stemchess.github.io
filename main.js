@@ -29,6 +29,7 @@ let colorToMove = 'w';
 
 // Note where the kings are
 let kingLocations = {};
+let checked = false;
 
 // This allows us to quickly look up which file we are in from a number (or vice versa)
 // Used in a number of places
@@ -502,6 +503,12 @@ function movePiece(secondMove = false) {
     if (!secondMove) {
         // Change whose turn it is
         colorToMove = flipColor(colorToMove);
+    }
+
+    if (isAttacking(colorToMove, kingLocations[colorToMove])) {
+        checked = true;
+    } else {
+        checked = false;
     }
 
     // Display the move
