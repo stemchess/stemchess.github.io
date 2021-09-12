@@ -205,6 +205,23 @@ function flipColor(color) {
     }
 }
 
+// Performs a deep clone of an array (i.e. the board), not referencing the original
+// Based off of https://github.com/angus-c/just/blob/master/packages/collection-clone/index.js, licensed under the MIT License
+
+function clone(obj) {
+  let result = Array.isArray(obj) ? [] : {};
+  for (const key in obj) {
+    let value = obj[key];
+    let type = {}.toString.call(value).slice(8, -1);
+    if (type == 'Array' || type == 'Object') {
+      result[key] = clone(value);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
 function piecesBetween(start, end) {
     let startIndex = notationToArrayIndex(start);
     let endIndex = notationToArrayIndex(end);
