@@ -45,6 +45,13 @@ let EP = '';
 // Note if a castling is underway
 let castling = false;
 
+// Detect if the browser supports <dialog> elements
+let dialog = false;
+
+if (typeof HTMLDialogElement === 'function') {
+    dialog = true;
+}
+
 /* BOARD SETUP */
 
 /*
