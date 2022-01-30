@@ -25,7 +25,7 @@ so I just used it everywhere so I don't have to convert it back and forth.
 let board = [];
 
 // Note whose turn it is
-let colorToMove = 'w';
+let colorMoving = 'w';
 
 // Note where the kings are
 let kingLocations = {};
@@ -173,7 +173,7 @@ function resetBoard() {
     EP = '';
 
     // White moves first
-    colorToMove = 'w';
+    colorMoving = 'w';
 
     // Make the pieces actually show up
     // This is probably somewhat inefficient (as noted above), but it's simple.
@@ -315,8 +315,10 @@ function validateMove(piece, endingPosition, attacking = false) {
     let startingIndex = notationToArrayIndex(startingPosition);
     let endingIndex = notationToArrayIndex(endingPosition);
 
+    let endingSpace = board[endingIndex.x][endingIndex.y];
+    
     // We cannot move to a tile with a piece of the same color on it
-    if (board[endingIndex.x][endingIndex.y] != undefined && board[endingIndex.x][endingIndex.y].color == piece.color) {
+    if (endingSpace != undefined && endingSpace.color == piece.color) {
         return false;
     }
 
@@ -335,7 +337,7 @@ function validateMove(piece, endingPosition, attacking = false) {
             }
 
             if (dx == 0 && forward == 1) {
-                if (board[endingIndex.x][endingIndex.y] != undefined || attacking) {
+                if (endingSpace != undefined || attacking) {
                     // Pawns can't capture forward
                     return false;
                 } else {
@@ -344,7 +346,7 @@ function validateMove(piece, endingPosition, attacking = false) {
             }
 
             if (dx == 0 && forward == 2 && piece.canDoubleMove && piecesBetween(startingPosition, endingPosition) == false) {
-                if (board[endingIndex.x][endingIndex.y] != undefined || attacking) {
+                if (endingSpace != undefined || attacking) {
                     // Pawns can't capture forward
                     return false;
                 } else {
@@ -352,19 +354,16 @@ function validateMove(piece, endingPosition, attacking = false) {
                 }
             }
 
-            let x = endingIndex.x;
-            let y = endingIndex.y;
-
-            if (Math.abs(dx) == 1 && forward == 1 && (board[x][y] != undefined || attacking)) {
+            if (Math.abs(dx) == 1 && forward == 1 && (endingSpace != undefined || attacking)) {
                 return true;
             }
 
-            y = startingIndex.y;
+            let enPassantedSpace = board[endingIndex.x][startingIndex.y];
             
-            if (Math.abs(dx) == 1 && forward == 1 && board[x][y] != undefined && board[x][y].canBeEnPassanted && board[x][y].color != piece.color) {
+            if (Math.abs(dx) == 1 && forward == 1 && enPassantedSpace != undefined && enPassantedSpace.canBeEnPassanted) {
                 if (!attacking) {
-                    document.getElementById(board[x][y].position).style.backgroundImage = 'unset';
-                    board[x][y] = undefined;
+                    document.getElementById(enPassantedSpace.position).style.backgroundImage = 'unset';
+                    enPassantedSpace = undefined;
                     EP = '';
                 }
                 return true;
@@ -519,10 +518,10 @@ function movePiece(secondMove = false) {
 
     if (!secondMove) {
         // Change whose turn it is
-        colorToMove = flipColor(colorToMove);
+        colorMoving = flipColor(colorMoving);
     }
 
-    if (isAttacked(colorToMove, kingLocations[colorToMove])) {
+    if (isAttacked(colorMoving, kingLocations[colorMoving])) {
         checked = true;
     } else {
         checked = false;
@@ -588,7 +587,7 @@ function clickSquare(e) {
         // If there are no tiles selected for the current move, select this one if there is a piece there
         let index = notationToArrayIndex(tileClicked);
         
-        if (board[index.x][index.y] && board[index.x][index.y].color == colorToMove) {
+        if (board[index.x][index.y] && board[index.x][index.y].color == colorMoving) {
             currentMove[0] = tileClicked;
             elementClicked.classList.add('selected');
         }
@@ -597,7 +596,7 @@ function clickSquare(e) {
         currentMove = new Array(2);
         elementClicked.classList.remove('selected');
     } else {
-        // If one other tile is alredy selected for the current move, check if the move is valid\
+        // If one other tile is alredy selected for the current move, check if the move is valid
         // If it is, select this tile and move the piece
         let startIndex = notationToArrayIndex(currentMove[0]);
 
