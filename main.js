@@ -48,7 +48,7 @@ let castling = false;
 /* BOARD SETUP */
 
 /*
-This class takes variuos characteristics and turns them into an "object".
+This class takes various characteristics and turns them into an "object".
 We can use this to create an object for each piece, but with a lot of shared characteristics to avoid repetition.
 */
 class chessPiece {
@@ -390,6 +390,14 @@ function validateMove(piece, endingPosition, attacking = false) {
             return false;
 
         case 'k':
+            // A king cannot move into check
+            // This provides partial enforcement before enforcing check is fully supported
+            if (!attacking) {
+                if (isAttacked(piece.color, endingPosition)) {
+                    return false;
+                }
+            }
+
             if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
                 return true;
             } else if (piece.canCastle && !attacking) {
