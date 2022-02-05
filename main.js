@@ -46,11 +46,12 @@ let EP = '';
 let castling = false;
 
 // Detect if the browser supports <dialog> elements
-let dialog = false;
+let hasDialog = false;
 
 if (typeof HTMLDialogElement === 'function') {
-    dialog = true;
+    hasDialog = true;
 }
+
 
 /* BOARD SETUP */
 
@@ -625,3 +626,13 @@ function clickSquare(e) {
 
 // Run a function when the board is clicked
 document.getElementById('tiles').addEventListener('click', clickSquare);
+
+function setupDialog() {
+    const newDialog = `<dialog>
+</dialog>`;
+
+    document.getElementById('header').insertAdjacentHTML('afterend', newDialog);
+
+}
+
+if (hasDialog) { setupDialog(); }
