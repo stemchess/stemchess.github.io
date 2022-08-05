@@ -112,6 +112,15 @@ a {
     height: 4vmin;
 }
 
+.dialogButton {
+    margin: 1vmin;
+}
+
+.dialogPieceIcon {
+    width: 12vmin;
+    height: 12vmin;
+}
+
 #changelog {
     padding: 1em;
     font-size: 1.2em;

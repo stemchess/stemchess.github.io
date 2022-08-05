@@ -50,6 +50,7 @@ let hasDialog = false;
 
 if (typeof HTMLDialogElement === 'function') {
     hasDialog = true;
+    var magicPromotionFunction;
 }
 
 
@@ -213,23 +214,6 @@ function flipColor(color) {
     }
 }
 
-// Performs a deep clone of an array (i.e. the board), not referencing the original
-// Based off of https://github.com/angus-c/just/blob/master/packages/collection-clone/index.js, licensed under the MIT License
-
-function clone(obj) {
-  let result = Array.isArray(obj) ? [] : {};
-  for (const key in obj) {
-    let value = obj[key];
-    let type = {}.toString.call(value).slice(8, -1);
-    if (type == 'Array' || type == 'Object') {
-      result[key] = clone(value);
-    } else {
-      result[key] = value;
-    }
-  }
-  return result;
-}
-
 function piecesBetween(start, end) {
     let startIndex = notationToArrayIndex(start);
     let endIndex = notationToArrayIndex(end);
@@ -317,14 +301,14 @@ function piecesBetween(start, end) {
     }
 }
 
-function validateMove(piece, endingPosition, attacking = false) {
+function validateMove(piece, endingPosition, validateOnly = false) {
     let startingPosition = piece.position;
 
     let startingIndex = notationToArrayIndex(startingPosition);
     let endingIndex = notationToArrayIndex(endingPosition);
 
     let endingSpace = board[endingIndex.x][endingIndex.y];
-    
+
     // We cannot move to a tile with a piece of the same color on it
     if (endingSpace != undefined && endingSpace.color == piece.color) {
         return false;
@@ -345,7 +329,7 @@ function validateMove(piece, endingPosition, attacking = false) {
             }
 
             if (dx == 0 && forward == 1) {
-                if (endingSpace != undefined || attacking) {
+                if (endingSpace != undefined || validateOnly) {
                     // Pawns can't capture forward
                     return false;
                 } else {
@@ -354,7 +338,7 @@ function validateMove(piece, endingPosition, attacking = false) {
             }
 
             if (dx == 0 && forward == 2 && piece.canDoubleMove && piecesBetween(startingPosition, endingPosition) == false) {
-                if (endingSpace != undefined || attacking) {
+                if (endingSpace != undefined || validateOnly) {
                     // Pawns can't capture forward
                     return false;
                 } else {
@@ -362,16 +346,16 @@ function validateMove(piece, endingPosition, attacking = false) {
                 }
             }
 
-            if (Math.abs(dx) == 1 && forward == 1 && (endingSpace != undefined || attacking)) {
+            if (Math.abs(dx) == 1 && forward == 1 && (endingSpace != undefined || validateOnly)) {
                 return true;
             }
 
             let enPassantedSpace = board[endingIndex.x][startingIndex.y];
             
             if (Math.abs(dx) == 1 && forward == 1 && enPassantedSpace != undefined && enPassantedSpace.canBeEnPassanted) {
-                if (!attacking) {
+                if (!validateOnly) {
                     document.getElementById(enPassantedSpace.position).style.backgroundImage = 'unset';
-                    enPassantedSpace = undefined;
+                    board[endingIndex.x][startingIndex.y] = undefined;
                     EP = '';
                 }
                 return true;
@@ -400,7 +384,8 @@ function validateMove(piece, endingPosition, attacking = false) {
         case 'k':
             // A king cannot move into check
             // This provides partial enforcement before enforcing check is fully supported
-            if (!attacking) {
+            // Also prevent an infinite loop
+            if (!validateOnly) {
                 if (isAttacked(piece.color, endingPosition)) {
                     return false;
                 }
@@ -408,7 +393,7 @@ function validateMove(piece, endingPosition, attacking = false) {
 
             if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
                 return true;
-            } else if (piece.canCastle && !attacking) {
+            } else if (piece.canCastle && !validateOnly) {
                 if (piece.color == 'w') {
                     if (endingPosition == 'c1') {
                         if (board[0][0] != undefined && board[0][0].canCastle && piecesBetween(startingPosition, 'a1') == false) {
@@ -475,18 +460,24 @@ function isAttacked(attackedColor, attackedTile) {
     });
 }
 
-function movePiece(secondMove = false) {
-    // An en passant can only take place the next move (and taking care of this before anything actually changes is easier)
-    if (EP != '') {
-        let epIndex = notationToArrayIndex(EP);
-        board[epIndex.x][epIndex.y].canBeEnPassanted = false;
-        EP = '';
-    }
+async function showPromotionDialog(xIndex, yIndex, tile) {
+    let original = board[xIndex][yIndex];
+
+    window.promotion.showModal();
+
+    let piece;
+    let promise = new Promise((resolve) => { magicPromotionFunction = resolve; });
+    await promise.then((result) => { piece = result; });
     
-    if (!secondMove) {
-        // Stop marking the previous move
-        unmarkPreviousMove();
-    }
+    board[xIndex][yIndex] = new chessPiece(original.position, piece, original.color);
+
+    window.promotion.close();
+
+    let imageURL = 'url("/images/' + piece + original.color + '.svg")';
+    document.getElementById(tile).style.backgroundImage = imageURL;
+}
+
+async function movePiece(secondMove = false) {
 
     // Convert a few things into more easily usable formats
     let startingIndex = notationToArrayIndex(currentMove[0]);
@@ -495,12 +486,24 @@ function movePiece(secondMove = false) {
     let startingElement = document.getElementById(currentMove[0]);
     let endingElement = document.getElementById(currentMove[1]);
 
+    // An en passant can only take place the next move
+    if (EP != '') {
+        let epIndex = notationToArrayIndex(EP);
+        board[epIndex.x][epIndex.y].canBeEnPassanted = false;
+        EP = '';
+    }
+
+    if (!secondMove) {
+        // Stop marking the previous move
+        unmarkPreviousMove();
+    }
+
     // Move the piece on our JS representation of the board (overwriting anything that's already there)
     board[endingIndex.x][endingIndex.y] = board[startingIndex.x][startingIndex.y];
     board[endingIndex.x][endingIndex.y].position = currentMove[1];
     board[startingIndex.x][startingIndex.y] = undefined;
 
-    let promoted = false;
+    let promotion = false;
 
     // A pawn cannot move two tiles after its first move
     if (board[endingIndex.x][endingIndex.y].type == 'p') {
@@ -512,14 +515,19 @@ function movePiece(secondMove = false) {
             EP = currentMove[1];
         }
 
-        // If a pawn is in the last rank, promote it to a queen
+        // If a pawn is in the last rank, promote it
         if (endingIndex.y == 0 || endingIndex.y == 7) {
-            let original = board[endingIndex.x][endingIndex.y];
-            board[endingIndex.x][endingIndex.y] = new chessPiece(original.position, 'q', original.color);
-
-            let imageURL = 'url("/images/q' + original.color + '.svg")';
-            endingElement.style.backgroundImage = imageURL;
-            promoted = true;
+            promotion = true;
+            // Allow a choice of promotion if supported
+            if (hasDialog) {
+                showPromotionDialog(endingIndex.x, endingIndex.y, currentMove[1]);
+            } else {
+                let original = board[endingIndex.x][endingIndex.y];
+                board[endingIndex.x][endingIndex.y] = new chessPiece(original.position, 'q', original.color);
+    
+                let imageURL = 'url("/images/q' + original.color + '.svg")';
+                endingElement.style.backgroundImage = imageURL;
+            }
         }
     }
 
@@ -544,7 +552,7 @@ function movePiece(secondMove = false) {
     }
 
     // Display the move
-    if (!promoted) {
+    if (!promotion) {
         endingElement.style.backgroundImage = startingElement.style.backgroundImage;
     }
     startingElement.style.backgroundImage = '';
@@ -624,15 +632,18 @@ function clickSquare(e) {
     }
 }
 
-// Run a function when the board is clicked
-document.getElementById('tiles').addEventListener('click', clickSquare);
-
 function setupDialog() {
-    const newDialog = `<dialog>
+    const newDialog = `<dialog id="promotion">
+    <button class="dialogButton" onclick="magicPromotionFunction('q')"><img src="images/qw.svg" class="dialogPieceIcon" alt="queen"></img></button>
+    <button class="dialogButton" onclick="magicPromotionFunction('r')"><img src="images/rw.svg" class="dialogPieceIcon" alt="rook"></img></button>
+    <button class="dialogButton" onclick="magicPromotionFunction('b')"><img src="images/bw.svg" class="dialogPieceIcon" alt="bishop"></img></button>
+    <button class="dialogButton" onclick="magicPromotionFunction('n')"><img src="images/nw.svg" class="dialogPieceIcon" alt="knight"></img></button>
 </dialog>`;
 
     document.getElementById('header').insertAdjacentHTML('afterend', newDialog);
-
 }
 
 if (hasDialog) { setupDialog(); }
+
+// Run a function when the board is clicked
+document.getElementById('tiles').addEventListener('click', clickSquare);
