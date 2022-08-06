@@ -463,7 +463,9 @@ function isAttacked(attackedColor, attackedTile) {
 async function showPromotionDialog(xIndex, yIndex, tile) {
     let original = board[xIndex][yIndex];
 
-    window.promotion.showModal();
+    document.getElementById('promotionDialog').className = original.color;
+
+    window.promotionDialog.showModal();
 
     let piece;
     let promise = new Promise((resolve) => { magicPromotionFunction = resolve; });
@@ -471,7 +473,7 @@ async function showPromotionDialog(xIndex, yIndex, tile) {
     
     board[xIndex][yIndex] = new chessPiece(original.position, piece, original.color);
 
-    window.promotion.close();
+    window.promotionDialog.close();
 
     let imageURL = 'url("/images/' + piece + original.color + '.svg")';
     document.getElementById(tile).style.backgroundImage = imageURL;
@@ -633,11 +635,11 @@ function clickSquare(e) {
 }
 
 function setupDialog() {
-    const newDialog = `<dialog id="promotion">
-    <button class="dialogButton" onclick="magicPromotionFunction('q')"><img src="images/qw.svg" class="dialogPieceIcon" alt="queen"></img></button>
-    <button class="dialogButton" onclick="magicPromotionFunction('r')"><img src="images/rw.svg" class="dialogPieceIcon" alt="rook"></img></button>
-    <button class="dialogButton" onclick="magicPromotionFunction('b')"><img src="images/bw.svg" class="dialogPieceIcon" alt="bishop"></img></button>
-    <button class="dialogButton" onclick="magicPromotionFunction('n')"><img src="images/nw.svg" class="dialogPieceIcon" alt="knight"></img></button>
+    const newDialog = `<dialog id="promotionDialog">
+    <button class="dialogButton" onclick="magicPromotionFunction('q')"><div class="dialogPieceIcon queen" alt="queen"></div></button>
+    <button class="dialogButton" onclick="magicPromotionFunction('r')"><div class="dialogPieceIcon rook" alt="rook"></div></button>
+    <button class="dialogButton" onclick="magicPromotionFunction('b')"><div class="dialogPieceIcon bishop" alt="bishop"></div></button>
+    <button class="dialogButton" onclick="magicPromotionFunction('n')"><div class="dialogPieceIcon knight" alt="knight"></div></button>
 </dialog>`;
 
     document.getElementById('header').insertAdjacentHTML('afterend', newDialog);

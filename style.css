@@ -121,6 +121,37 @@ a {
     height: 12vmin;
 }
 
+#promotionDialog.b > .dialogButton > .dialogPieceIcon.queen {
+    background-image: url(/images/qb.svg);
+}
+
+#promotionDialog.b > .dialogButton > .dialogPieceIcon.rook {
+    background-image: url(/images/rb.svg);
+}
+
+#promotionDialog.b > .dialogButton > .dialogPieceIcon.bishop {
+    background-image: url(/images/bb.svg);
+}
+
+#promotionDialog.b > .dialogButton > .dialogPieceIcon.knight {
+    background-image: url(/images/nb.svg);
+}
+#promotionDialog.w > .dialogButton > .dialogPieceIcon.queen {
+    background-image: url(/images/qw.svg);
+}
+
+#promotionDialog.w > .dialogButton > .dialogPieceIcon.rook {
+    background-image: url(/images/rw.svg);
+}
+
+#promotionDialog.w > .dialogButton > .dialogPieceIcon.bishop {
+    background-image: url(/images/bw.svg);
+}
+
+#promotionDialog.w > .dialogButton > .dialogPieceIcon.knight {
+    background-image: url(/images/nw.svg);
+}
+
 #changelog {
     padding: 1em;
     font-size: 1.2em;
