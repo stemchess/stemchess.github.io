@@ -29,7 +29,6 @@ let colorMoving = 'w';
 
 // Note where the kings are
 let kingLocations = {};
-let checked = false;
 
 // This allows us to quickly look up which file we are in from a number (or vice versa)
 // Used in a number of places
@@ -479,7 +478,12 @@ async function showPromotionDialog(xIndex, yIndex, tile) {
     document.getElementById(tile).style.backgroundImage = imageURL;
 }
 
-async function movePiece(secondMove = false) {
+function undoMove(move) {
+    board[move.startX][move.startY] = move.startPiece;
+    board[move.endX][move.endY] = move.endPiece;
+}
+
+async function movePiece() {
 
     // Convert a few things into more easily usable formats
     let startingIndex = notationToArrayIndex(currentMove[0]);
@@ -488,22 +492,38 @@ async function movePiece(secondMove = false) {
     let startingElement = document.getElementById(currentMove[0]);
     let endingElement = document.getElementById(currentMove[1]);
 
+    // Backup the changes we are about to make unless we need to undo them shortly
+    let move = {};
+    move.startX = startingIndex.x;
+    move.startY = startingIndex.y;
+    move.endX = endingIndex.x;
+    move.endY = endingIndex.y;
+    move.startPiece = Object.assign({}, board[startingIndex.x][startingIndex.y]);
+    move.endPiece = Object.assign({}, board[endingIndex.x][endingIndex.y]);
+
+    // Move the piece on our JS representation of the board (overwriting anything that's already there)
+    board[endingIndex.x][endingIndex.y] = board[startingIndex.x][startingIndex.y];
+    board[endingIndex.x][endingIndex.y].position = currentMove[1];
+    board[startingIndex.x][startingIndex.y] = undefined;
+
+    // Determine if this move ends in check
+    let currentKingLocation = kingLocations[colorMoving];
+
+    if (board[endingIndex.x][endingIndex.y].type == 'k') {
+        currentKingLocation = currentMove[1];
+    }
+
+    if (isAttacked(colorMoving, currentKingLocation)) {
+        undoMove(move);
+        return Promise.reject('Illegal move');
+    }
+
     // An en passant can only take place the next move
     if (EP != '') {
         let epIndex = notationToArrayIndex(EP);
         board[epIndex.x][epIndex.y].canBeEnPassanted = false;
         EP = '';
     }
-
-    if (!secondMove) {
-        // Stop marking the previous move
-        unmarkPreviousMove();
-    }
-
-    // Move the piece on our JS representation of the board (overwriting anything that's already there)
-    board[endingIndex.x][endingIndex.y] = board[startingIndex.x][startingIndex.y];
-    board[endingIndex.x][endingIndex.y].position = currentMove[1];
-    board[startingIndex.x][startingIndex.y] = undefined;
 
     let promotion = false;
 
@@ -542,33 +562,11 @@ async function movePiece(secondMove = false) {
         kingLocations[board[endingIndex.x][endingIndex.y].color] = currentMove[1];
     }
 
-    if (!secondMove) {
-        // Change whose turn it is
-        colorMoving = flipColor(colorMoving);
-    }
-
-    if (isAttacked(colorMoving, kingLocations[colorMoving])) {
-        checked = true;
-    } else {
-        checked = false;
-    }
-
     // Display the move
     if (!promotion) {
         endingElement.style.backgroundImage = startingElement.style.backgroundImage;
     }
     startingElement.style.backgroundImage = '';
-
-    if (!secondMove) {
-        // Change the background of the previous move
-        let previous = document.getElementsByClassName('selected');
-
-        // Work from the end backward, as elements disappear once we change their class
-        previous[1].classList.add('previous');
-        previous[0].classList.add('previous');
-        previous[1].classList.remove('selected');
-        previous[0].classList.remove('selected');
-    }
 
     // Set this to be the previous move and set the current to be empty
     previousMove = currentMove;
@@ -595,16 +593,38 @@ async function movePiece(secondMove = false) {
                 break;
             }
 
-        movePiece(true);
+        movePiece();
 
         // Highlight the rook as well
         document.getElementById(previousMove[0]).classList.add('previous');
         document.getElementById(previousMove[1]).classList.add('previous');
     }
+
+    return true;
+}
+
+// Tidy up some things that can only ever happen once per move,
+// and which it is easier to do at the end of the move
+function finalizeMove() {
+
+    // Stop marking the previous move
+    unmarkPreviousMove();
+    
+    // Change whose turn it is
+    colorMoving = flipColor(colorMoving);
+
+    // Change the background of the previous move
+    let previous = document.getElementsByClassName('selected');
+
+    // Work from the end backward, as elements disappear once we change their class
+    previous[1].classList.add('previous');
+    previous[0].classList.add('previous');
+    previous[1].classList.remove('selected');
+    previous[0].classList.remove('selected');
 }
 
 // This is the function that runs when the board is clicked
-function clickSquare(e) {
+async function clickSquare(e) {
     // Detect which tile was clicked
     let elementClicked = e.target;
     let tileClicked = elementClicked.id;
@@ -628,8 +648,14 @@ function clickSquare(e) {
 
         if (validateMove(board[startIndex.x][startIndex.y], tileClicked)) {
             currentMove[1] = tileClicked;
-            elementClicked.classList.add('selected');
-            movePiece();
+
+            try {
+                // Do everything
+                if (await movePiece()) {
+                    elementClicked.classList.add('selected');
+                    finalizeMove();
+                }
+            } catch (err) { console.log(err); }
         }
     }
 }
