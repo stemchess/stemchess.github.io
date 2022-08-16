@@ -629,10 +629,10 @@ async function clickSquare(e) {
     let elementClicked = e.target;
     let tileClicked = elementClicked.id;
 
+    let index = notationToArrayIndex(tileClicked);
+
     if (currentMove[0] == undefined) {
         // If there are no tiles selected for the current move, select this one if there is a piece there
-        let index = notationToArrayIndex(tileClicked);
-        
         if (board[index.x][index.y] && board[index.x][index.y].color == colorMoving) {
             currentMove[0] = tileClicked;
             elementClicked.classList.add('selected');
@@ -641,6 +641,12 @@ async function clickSquare(e) {
         // If this tile is already selected for the current move, deselect it
         currentMove = new Array(2);
         elementClicked.classList.remove('selected');
+    } else if (board[index.x][index.y] && board[index.x][index.y].color == colorMoving) {
+        // If clicking another piece of the correct color, deselect that and select this instead
+        document.getElementsByClassName('selected')[0].classList.remove('selected');
+
+        currentMove[0] = tileClicked;
+        elementClicked.classList.add('selected');
     } else {
         // If one other tile is alredy selected for the current move, check if the move is valid
         // If it is, select this tile and move the piece
