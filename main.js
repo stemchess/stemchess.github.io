@@ -38,8 +38,9 @@ const fileLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 let previousMove = new Array(2);
 let currentMove = new Array(2);
 
-// Note if a piece can be en passant-ed
+// Note if a piece can be en passant-ed, and if it will be
 let EP = '';
+let willEP = false;
 
 // Note if a castling is underway
 let castling = false;
@@ -353,9 +354,7 @@ function validateMove(piece, endingPosition, validateOnly = false) {
             
             if (Math.abs(dx) == 1 && forward == 1 && enPassantedSpace != undefined && enPassantedSpace.canBeEnPassanted) {
                 if (!validateOnly) {
-                    document.getElementById(enPassantedSpace.position).style.backgroundImage = 'unset';
-                    board[endingIndex.x][startingIndex.y] = undefined;
-                    EP = '';
+                    willEP = true;
                 }
                 return true;
             }
@@ -481,6 +480,8 @@ async function showPromotionDialog(xIndex, yIndex, tile) {
 function undoMove(move) {
     board[move.startX][move.startY] = move.startPiece;
     board[move.endX][move.endY] = move.endPiece;
+
+    willEP = false;
 }
 
 async function movePiece() {
@@ -492,7 +493,8 @@ async function movePiece() {
     let startingElement = document.getElementById(currentMove[0]);
     let endingElement = document.getElementById(currentMove[1]);
 
-    // Backup the changes we are about to make unless we need to undo them shortly
+    // Backup the changes we are about to make in case we need to undo them shortly
+    // TODO: figure out how in the world it's possible to end up with a space occupied by {}, because apparantly it is somehow
     let move = {};
     move.startX = startingIndex.x;
     move.startY = startingIndex.y;
@@ -521,7 +523,13 @@ async function movePiece() {
     // An en passant can only take place the next move
     if (EP != '') {
         let epIndex = notationToArrayIndex(EP);
-        board[epIndex.x][epIndex.y].canBeEnPassanted = false;
+        if (willEP) {
+            document.getElementById(EP).style.backgroundImage = 'unset';
+            board[epIndex.x][epIndex.y] = undefined;
+        } else {
+            board[epIndex.x][epIndex.y].canBeEnPassanted = false;
+        }
+        willEP = false;
         EP = '';
     }
 
@@ -648,7 +656,7 @@ async function clickSquare(e) {
         currentMove[0] = tileClicked;
         elementClicked.classList.add('selected');
     } else {
-        // If one other tile is alredy selected for the current move, check if the move is valid
+        // If one other tile is already selected for the current move, check if the move is valid
         // If it is, select this tile and move the piece
         let startIndex = notationToArrayIndex(currentMove[0]);
 
