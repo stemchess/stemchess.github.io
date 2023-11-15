@@ -1,2 +1,2 @@
 # stemchess.github.io
-A simple online chess engine written in Javascript.
+A simple online chess game written in Javascript.
